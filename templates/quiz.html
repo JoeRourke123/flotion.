@@ -105,7 +105,7 @@
             text-align: center;
         }
 
-        #modules button, #newItem {
+        #modules button, #newItem button {
             margin-left: 5px;
             margin-right: 5px;
             margin-bottom: 5px;
@@ -122,13 +122,23 @@
             right: 0;
             bottom: 20px;
             margin: auto;
+            width: 100%;
+            text-align: center;
+        }
 
+        #newItem button {
             font-size: 16px;
-
             padding-left: 20px;
             padding-right: 20px;
-
+        }
+        #newItem #next {
             background-color: cadetblue;
+        }
+        #newItem #success {
+            background-color: darkolivegreen;
+        }
+        #newItem #wrong {
+            background-color: firebrick;
         }
 
         .active {
@@ -170,9 +180,17 @@
     <div id="answer">
     </div>
 </div>
-<button id="newItem">
-    Next
-</button>
+<div id="newItem">
+    <button id="wrong">
+        Wrong
+    </button>
+    <button id="next">
+        Next
+    </button>
+    <button id="success">
+        Success
+    </button>
+</div>
 </body>
 <script>
     function buildAnswer(contents) {
@@ -237,7 +255,7 @@
         }
     }
 
-    document.getElementById("newItem").onclick = async (e) => {
+    document.getElementById("next").onclick = async (e) => {
         await fillCard();
     };
 
