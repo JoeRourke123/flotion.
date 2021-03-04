@@ -1,3 +1,4 @@
+from urllib.parse import quote, unquote
 from flask import Flask, render_template
 from notion.block import Block
 from notion.client import NotionClient
@@ -10,6 +11,8 @@ notion = NotionClient(
              "b6386f38052d369ab580a0f27506f45fa5c22a294546f5f879da641e923247e2"
 )
 
+GREEN_LIMIT = 12
+YELLOW_LIMIT = 6
 CARD_PAGE = "https://www.notion.so/joerourke/cc94ab7b40e5445dbabf5cddf6e6863a?v=04f75288e34242798be38589207a1486"
 BLOCK_TYPE_MAPPING = {
     "image": "img",
@@ -18,6 +21,11 @@ BLOCK_TYPE_MAPPING = {
 BLOCK_VALUE_MAPPING = {
     "image": "source",
     "text": "title",
+}
+COVER_MAPPINGS = {
+    "/images/page-cover/solid_red.png": "red",
+    "/images/page-cover/solid_yellow.png": "yellow",
+    "/images/page-cover/solid_blue.png": "green"
 }
 
 
@@ -53,11 +61,59 @@ def get_card_module(item: CollectionRowBlock):
 
 
 def get_cover_level(item: CollectionRowBlock):
-    return {
-        "/images/page-cover/solid_red.png": "red",
-        "/images/page-cover/solid_yellow.png": "yellow",
-        "/images/page-cover/solid_blue.png": "green"
-    }.get(item.cover, "red")
+    return COVER_MAPPINGS.get(item.cover, "red")
+
+
+def __get_item_from_collection(col: list, id: str) -> CollectionRowBlock:
+    for item in col:
+        if str(item.id) == id:
+            return item
+    return None
+
+
+def __change_cover(item: CollectionRowBlock):
+    corrects = item.get_property("Correct")
+    cover = item.cover
+
+    limits = [GREEN_LIMIT, YELLOW_LIMIT, 0]
+    covers = ["/images/page-cover/solid_blue.png",
+              "/images/page-cover/solid_yellow.png",
+              "/images/page-cover/solid_red.png"]
+    for i in range(len(limits)):
+        if corrects >= limits[i] and cover != covers[i]:
+            item.cover = covers[i]
+            break
+
+
+@app.route("/c/<path:url>", methods=["POST"])
+def correct(url):
+    try:
+        item = notion.get_block(unquote(url))
+    except Exception as e:
+        print(e)
+        return {"error": True}
+
+    correct = item.get_property("Correct")
+    item.set_property("Correct", correct + 1)
+
+    __change_cover(item)
+
+    return {"success": True}
+
+
+@app.route("/w/<path:url>", methods=["POST"])
+def incorrect(url):
+    try:
+        item = notion.get_block(unquote(url))
+    except:
+        return {"error": True}
+
+    correct = item.get_property("Correct")
+    item.set_property("Correct", correct - 1)
+
+    __change_cover(item)
+
+    return {"success": True}
 
 
 @app.route('/q/<module>')
@@ -73,9 +129,9 @@ def question(module):
     parsed_card = {"error": True}
 
     while not populated and len(filtered) > 0:
-        random_item = choice(filtered)
-
+        random_item: CollectionRowBlock = choice(filtered)
         parsed_card = {
+            "id": quote(random_item.get_browseable_url()),
             "title": get_card_title(random_item),
             "content": get_card_content(random_item),
             "module": get_card_module(random_item),

@@ -15,8 +15,10 @@
 
         #loader {
             position: absolute;
-            top: 0; bottom: 0;
-            left: 0; right: 0;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
             margin: auto;
             width: 100px;
             height: 100px;
@@ -61,13 +63,34 @@
             color: #FFFFFF;
             font-family: 'Ubuntu', 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
         }
-        .CS2860 { background: rgba(252, 162, 83, 0.5)}
-        .CS2850 { background: rgba(83, 184, 252, 0.5)}
-        .IY2760 { background: rgba(252, 83, 170, 0.5)}
-        .CS2800 { background: rgba(127, 89, 63, 0.5)}
-        .CS2900 { background: rgba(64, 117, 50, 0.5)}
-        .CS2910 { background: rgba(155, 54, 249, 0.5)}
-        .CS2855 { background: rgba(252, 94, 85, 0.5)}
+
+        .CS2860 {
+            background: rgba(252, 162, 83, 0.5)
+        }
+
+        .CS2850 {
+            background: rgba(83, 184, 252, 0.5)
+        }
+
+        .IY2760 {
+            background: rgba(252, 83, 170, 0.5)
+        }
+
+        .CS2800 {
+            background: rgba(127, 89, 63, 0.5)
+        }
+
+        .CS2900 {
+            background: rgba(64, 117, 50, 0.5)
+        }
+
+        .CS2910 {
+            background: rgba(155, 54, 249, 0.5)
+        }
+
+        .CS2855 {
+            background: rgba(252, 94, 85, 0.5)
+        }
 
         #answer {
             position: absolute;
@@ -98,7 +121,7 @@
                 margin-right: 20px;
             }
         }
-        
+
         #modules {
             width: 100%;
             margin-top: 10px;
@@ -131,18 +154,21 @@
             padding-left: 20px;
             padding-right: 20px;
         }
+
         #newItem #next {
             background-color: cadetblue;
         }
+
         #newItem #success {
             background-color: darkolivegreen;
         }
+
         #newItem #wrong {
             background-color: firebrick;
         }
 
         .active {
-            box-shadow: rgba(0,0,0,0.3) 0px 0px 2px 2px;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 2px 2px;
         }
 
         .cardRow {
@@ -157,9 +183,18 @@
             height: 40px;
             border-radius: 360px;
         }
-        span.level.red { background: palevioletred; }
-        span.level.yellow { background: palegoldenrod; }
-        span.level.green { background: aquamarine; }
+
+        span.level.red {
+            background: palevioletred;
+        }
+
+        span.level.yellow {
+            background: palegoldenrod;
+        }
+
+        span.level.green {
+            background: aquamarine;
+        }
     </style>
 </head>
 <body>
@@ -193,11 +228,37 @@
 </div>
 </body>
 <script>
+    let item = {};
+
+    async function answerCard(correct) {
+        let card = document.getElementById("card");
+        let cardContent = card.innerHTML;
+        card.innerHTML = "<img id='loader' src='https://retchhh.files.wordpress.com/2015/03/loading2.gif' />";
+
+        if (item.hasOwnProperty("id")) {
+
+            const doCorrect = await fetch("/" + (correct ? "c" : "w") + "/" + item["id"], {
+                method: "POST"
+            });
+
+            if (doCorrect.ok) {
+                let resp = await doCorrect.json();
+
+                if (!resp.hasOwnProperty("error")) {
+                    await fillCard();
+                    return;
+                }
+            }
+        }
+
+        card.innerHTML = cardContent;
+    }
+
     function buildAnswer(contents) {
         let content = "";
 
-        for(let item of contents) {
-            switch(item["type"]) {
+        for (let item of contents) {
+            switch (item["type"]) {
                 case "text":
                     content += `<p>${item['value']}</p><br />`;
                     break;
@@ -213,12 +274,13 @@
 
     async function fillCard() {
         let card = document.getElementById("card");
+
         card.innerHTML = "<img id='loader' src='https://retchhh.files.wordpress.com/2015/03/loading2.gif' />";
         const resp = await fetch("/q/" + selected);
         if (resp.ok) {
-            let item = await resp.json();
+            item = await resp.json();
 
-            if(item.hasOwnProperty("error")) {
+            if (item.hasOwnProperty("error")) {
                 card.innerHTML = "<h1>No cards exist for this module yet!</h1>";
                 return;
             }
@@ -227,7 +289,7 @@
 <div>
     <h1>${item['title']}</h1>
     <div class="cardRow">
-        <span id="module" class="${ item['module'] }">${ item['module'] }</span><span class="level ${ item['level'] }"></span>
+        <span id="module" class="${item['module']}">${item['module']}</span><span class="level ${item['level']}"></span>
     </div>
 </div>
             `;
@@ -246,7 +308,7 @@
 
     let buttons = document.getElementById("modules").children;
     console.log(buttons);
-    for(let button of buttons) {
+    for (let button of buttons) {
         button.onclick = async (e) => {
             document.getElementById(selected).className = selected;
             selected = button.id;
@@ -257,6 +319,12 @@
 
     document.getElementById("next").onclick = async (e) => {
         await fillCard();
+    };
+    document.getElementById("success").onclick = async (e) => {
+        await answerCard(true);
+    };
+    document.getElementById("wrong").onclick = async (e) => {
+        await answerCard(false);
     };
 
     fillCard();
