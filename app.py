@@ -1,3 +1,4 @@
+from datetime import datetime
 from urllib.parse import quote, unquote
 from flask import Flask, render_template
 from notion.block import Block
@@ -31,6 +32,11 @@ COVER_MAPPINGS = {
 
 @app.route('/')
 def main():
+    return render_template('index.html')
+
+
+@app.route('/questions')
+def questions():
     return render_template('quiz.html')
 
 
@@ -71,8 +77,12 @@ def __get_item_from_collection(col: list, id: str) -> CollectionRowBlock:
     return None
 
 
-def __change_cover(item: CollectionRowBlock):
-    corrects = item.get_property("Correct")
+def __change_cover(item: CollectionRowBlock, correct=None):
+    if correct is None:
+        corrects = item.get_property("Correct")
+    else:
+        corrects = correct
+
     cover = item.cover
 
     limits = [GREEN_LIMIT, YELLOW_LIMIT, 0]
@@ -93,10 +103,11 @@ def correct(url):
         print(e)
         return {"error": True}
 
-    correct = item.get_property("Correct")
-    item.set_property("Correct", correct + 1)
+    item.set_property("Last Got Correct", datetime.now())
+    got_correct = item.get_property("Correct")
+    item.set_property("Correct", got_correct + 1)
 
-    __change_cover(item)
+    __change_cover(item, correct=got_correct + 1)
 
     return {"success": True}
 
@@ -108,22 +119,32 @@ def incorrect(url):
     except:
         return {"error": True}
 
-    correct = item.get_property("Correct")
-    item.set_property("Correct", correct - 1)
+    got_correct = item.get_property("Correct")
+    item.set_property("Correct", got_correct - 1)
 
-    __change_cover(item)
+    __change_cover(item, correct=got_correct - 1)
 
     return {"success": True}
 
 
 @app.route('/q/<module>')
-def question(module):
+def question(module: str):
     db = notion.get_collection_view(CARD_PAGE)
     coll: Collection = db.collection
 
     filtered = coll.get_rows()
+
+    show_level = "all"
+    for level in ["red", "yellow", "green"]:
+        if module.endswith(f"__{level}__"):
+            show_level = level
+            break
+
     if module != "all":
-        filtered = list(filter(lambda x: get_card_module(x) == module, filtered))
+        filtered = list(filter(lambda x: get_card_module(x) == module and
+                                        True if show_level == "all" else get_cover_level(x) == show_level, filtered))
+    else:
+        filtered = list(filter(lambda x: True if show_level == "all" else get_cover_level(x) == show_level, filtered))
 
     populated = False
     parsed_card = {"error": True}
