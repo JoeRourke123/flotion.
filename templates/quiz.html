@@ -2,333 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Notion Tester</title>
+    <title>Questions - Flotion</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <script>
+        // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
+        let vh = window.innerHeight * 0.01;
+        // Then we set the value in the --vh custom property to the root of the document
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    </script>
+
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <link rel="stylesheet" href="{{ url_for('static', filename='flotion.css') }}">
     <style>
-        body, html {
-            margin: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        #loader {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-            width: 100px;
-            height: 100px;
-        }
-
-        #outer {
-            width: 100%;
-            height: 100%;
-            margin-left: 20px;
-            margin-right: 20px;
-        }
-
-        #card {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-
-            max-width: 750px;
-            max-height: 600px;
-
-            transition: 0.5s ease-in-out opacity;
-
-            z-index: 999;
-
-            border-radius: 25px;
-            background: white;
-            box-shadow: rgba(0, 0, 0, 0.2) 1px 0px 8px 3px;
-        }
-
-        #card h1 {
-            padding: 20px;
-            font-family: 'Ubuntu', 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
-        }
-
-        #card #module {
-            margin-left: 20px;
-            padding: 10px;
-            border-radius: 15px;
-            color: #FFFFFF;
-            font-family: 'Ubuntu', 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
-        }
-
-        .CS2860 {
-            background: rgba(252, 162, 83, 0.5)
-        }
-
-        .CS2850 {
-            background: rgba(83, 184, 252, 0.5)
-        }
-
-        .IY2760 {
-            background: rgba(252, 83, 170, 0.5)
-        }
-
-        .CS2800 {
-            background: rgba(127, 89, 63, 0.5)
-        }
-
-        .CS2900 {
-            background: rgba(64, 117, 50, 0.5)
-        }
-
-        .CS2910 {
-            background: rgba(155, 54, 249, 0.5)
-        }
-
-        .CS2855 {
-            background: rgba(252, 94, 85, 0.5)
-        }
-
-        #answer {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-
-            background-color: white;
-
-            text-align: center;
-            padding-top: 30px;
-
-            font-family: 'Ubuntu', 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
-
-            max-width: 700px;
-            max-height: 550px;
-        }
-
-        #answer img {
-            max-width: 700px;
-            max-height: 550px;
-        }
-
-        @media screen and (max-width: 440px) {
-            #card, #answer {
-                margin-left: 20px;
-                margin-right: 20px;
-            }
-        }
-
-        #modules {
-            width: 100%;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        #modules button, #newItem button {
-            margin-left: 5px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-
-            border: none;
-            border-radius: 10px;
-            padding: 10px;
-            color: #FFFFFF;
-            font-size: 16px;
-        }
-
-        #newItem {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 20px;
-            margin: auto;
-            width: 100%;
-            text-align: center;
-        }
-
-        #newItem button {
-            font-size: 16px;
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-
-        #newItem #next {
-            background-color: cadetblue;
-        }
-
-        #newItem #success {
-            background-color: darkolivegreen;
-        }
-
-        #newItem #wrong {
-            background-color: firebrick;
-        }
-
-        .active {
-            box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 2px 2px;
-        }
-
-        .cardRow {
-            display: flex;
-            align-items: center;
-        }
-
-        span.level {
-            display: inline-block;
-            margin-left: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 360px;
-        }
-
-        span.level.red {
-            background: palevioletred;
-        }
-
-        span.level.yellow {
-            background: palegoldenrod;
-        }
-
-        span.level.green {
-            background: aquamarine;
+        body.dark {
+            --bg-color: #040404;
+            --bg-secondary-color: #191919;
+            --font-color: #f5f5f5;
+            --color-grey: #ccc;
+            --color-primary: #DC6E9F;
+            --color-secondary: #DFD3FD !important;
+            --color-darkGrey: #777;
         }
     </style>
 </head>
-<body>
-<div id="modules">
-    <button id="all" style="background: black" class="active">All</button>
-    <button id="CS2800" class="CS2800">CS2800</button>
-    <button id="CS2850" class="CS2850">CS2850</button>
-    <button id="CS2855" class="CS2855">CS2855</button>
-    <button id="CS2860" class="CS2860">CS2860</button>
-    <button id="CS2900" class="CS2900">CS2900</button>
-    <button id="CS2910" class="CS2910">CS2910</button>
-    <button id="IY2760" class="IY2760">IY2760</button>
+<body class="dark">
+<div id="loading-window" class="is-full-screen is-horizontal-align is-vertical-align is-loading">
+    <div class="loader">Loading...</div>
 </div>
-<div id="outer">
-    <div id="card">
+<div onclick="toggleOpacity()" id="question-window" class="is-full-screen is-horizontal-align is-vertical-align opened" style="flex-direction: column; text-align: center;">
+    <h1><em style="font-size: 42px !important;" id="question-title"></em></h1>
+    <br />
+    <span><a class="button outline primary" id="question-module"></a>
+    <a class="button" id="question-difficulty"><span>A</span></a></span>
+    <div class="question-footer is-full-width is-horizontal-align is-vertical-align" style="flex-direction: column;">
+        <p style="color: dimgray">Tap for Answer</p>
+        <br /><br />
+    </div>
+</div>
+<div onclick="toggleOpacity()" class="is-full-screen is-full-width is-horizontal-align is-vertical-align" id="answer">
+</div>
+<div class="is-full-width is-horizontal-align is-vertical-align question-actions">
+    <a onclick="answerQuestion(false)" class="button">Wrong</a>
+    <a onclick="answerQuestion(true)" class="button primary">Correct</a>
+</div>
 
-    </div>
-    <div id="answer">
-    </div>
-</div>
-<div id="newItem">
-    <button id="wrong">
-        Wrong
-    </button>
-    <button id="next">
-        Skip
-    </button>
-    <button id="success">
-        Success
-    </button>
-</div>
-</body>
+<script src="{{ url_for('static', filename='flotion.js') }}"></script>
 <script>
-    let item = {};
-
-    async function answerCard(correct) {
-        let card = document.getElementById("card");
-        let cardContent = card.innerHTML;
-        card.innerHTML = "<img id='loader' src='https://retchhh.files.wordpress.com/2015/03/loading2.gif' />";
-
-        if (item.hasOwnProperty("id")) {
-
-            const doCorrect = await fetch("/" + (correct ? "c" : "w") + "/" + item["id"], {
-                method: "POST"
-            });
-
-            if (doCorrect.ok) {
-                let resp = await doCorrect.json();
-
-                if (!resp.hasOwnProperty("error")) {
-                    await fillCard();
-                    return;
-                }
-            }
-        }
-
-        card.innerHTML = cardContent;
-    }
-
-    function buildAnswer(contents) {
-        let content = "";
-
-        for (let item of contents) {
-            switch (item["type"]) {
-                case "text":
-                    content += `<p>${item['value']}</p><br />`;
-                    break;
-                case "img":
-                    content += `<img src="${item['value']}" class="image" /><br />`
-                    break;
-            }
-        }
-
-        content.substring(0, content.length - 6);
-        return content;
-    }
-
-    async function fillCard() {
-        let card = document.getElementById("card");
-
-        card.innerHTML = "<img id='loader' src='https://retchhh.files.wordpress.com/2015/03/loading2.gif' />";
-        const resp = await fetch("/q/" + selected);
-        if (resp.ok) {
-            item = await resp.json();
-
-            if (item.hasOwnProperty("error")) {
-                card.innerHTML = "<h1>No cards exist for this module yet!</h1>";
-                return;
-            }
-
-            card.innerHTML = `
-<div>
-    <h1>${item['title']}</h1>
-    <div class="cardRow">
-        <span id="module" class="${item['module']}">${item['module']}</span><span class="level ${item['level']}"></span>
-    </div>
-</div>
-            `;
-            document.getElementById("answer").innerHTML = buildAnswer(item['content']);
-        }
-    }
-
-    let hidden = false;
-    let selected = "all";
-
-    let card = document.getElementById("card");
-    card.onclick = (e) => {
-        card.style.opacity = (hidden ? "1" : "0");
-        hidden = !hidden;
-    };
-
-    let buttons = document.getElementById("modules").children;
-    console.log(buttons);
-    for (let button of buttons) {
-        button.onclick = async (e) => {
-            document.getElementById(selected).className = selected;
-            selected = button.id;
-            button.className = selected + " active";
-            await fillCard();
-        }
-    }
-
-    document.getElementById("next").onclick = async (e) => {
-        await fillCard();
-    };
-    document.getElementById("success").onclick = async (e) => {
-        await answerCard(true);
-    };
-    document.getElementById("wrong").onclick = async (e) => {
-        await answerCard(false);
-    };
-
-    fillCard();
+    document.addEventListener("DOMContentLoaded", getQuestion);
 </script>
+</body>
 </html>
