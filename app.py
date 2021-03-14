@@ -1,4 +1,5 @@
 from datetime import datetime
+from os import environ
 from urllib.parse import quote, unquote
 from flask import Flask, render_template
 from notion.block import Block
@@ -8,8 +9,7 @@ from random import choice
 
 app = Flask(__name__)
 notion = NotionClient(
-    token_v2="3daa339104103a00940a3678dc4a54be431803a5f7bd48efe84064d47f113685656a1a4abac54868dbfd2bb1b302"
-             "b6386f38052d369ab580a0f27506f45fa5c22a294546f5f879da641e923247e2"
+    token_v2=environ.get("FLOTION_TOKEN", None)
 )
 
 GREEN_LIMIT = 12
