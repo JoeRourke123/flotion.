@@ -8,7 +8,8 @@ from random import choice
 
 app = Flask(__name__)
 notion = NotionClient(
-    token_v2=environ.get("FLOTION_TOKEN", None)
+    token_v2=environ.get("FLOTION_TOKEN", None),
+    enable_caching=True,
 )
 
 GREEN_LIMIT = 12
@@ -159,14 +160,14 @@ def question(module: str):
     if module != "all":
         filtered = list(filter(lambda x: get_card_module(x) == module and
                                         True if show_level == "all" else get_cover_level(x) == show_level, filtered))
-    else:
-        filtered = list(filter(lambda x: True if show_level == "all" else get_cover_level(x) == show_level, filtered))
+    elif show_level != "all":
+        filtered = list(filter(lambda x: get_cover_level(x) == show_level, filtered))
 
     populated = False
     parsed_card = {"error": True}
 
     while not populated and len(filtered) > 0:
-        random_item: CollectionRowBlock = choice(filtered)
+        random_item: CollectionRowBlock = choice(filtered,)
         parsed_card = {
             "id": quote(random_item.get_browseable_url()),
             "title": get_card_title(random_item),
