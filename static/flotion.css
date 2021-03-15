@@ -139,6 +139,10 @@ Home Page Stylings
     z-index: 444;
 }
 
+#answer {
+    flex-direction: column !important;
+}
+
 .question-footer {
     position: absolute;
     bottom: 20px;

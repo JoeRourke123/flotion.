@@ -2,7 +2,6 @@ from datetime import datetime
 from os import environ
 from urllib.parse import quote, unquote
 from flask import Flask, render_template
-from notion.block import Block
 from notion.client import NotionClient
 from notion.collection import Collection, CollectionRowBlock
 from random import choice
@@ -22,6 +21,7 @@ BLOCK_TYPE_MAPPING = {
 BLOCK_VALUE_MAPPING = {
     "image": "source",
     "text": "title",
+    "bulleted_list": "title",
 }
 COVER_MAPPINGS = {
     "/images/page-cover/solid_red.png": "red",
@@ -45,11 +45,23 @@ def get_card_title(item: CollectionRowBlock):
 
 
 def get_card_content(item: CollectionRowBlock):
-    print(item.children)
     contents = []
+    list_block = []
+    is_list = False
 
     for child in item.children:
         val = getattr(child, BLOCK_VALUE_MAPPING[str(child.type)])
+
+        is_list = str(child.type) == "bulleted_list"
+        if is_list:
+            list_block.append(val)
+            continue
+        elif len(list_block) > 0:
+            contents.append({
+                "type": "list",
+                "value": list_block
+            })
+            list_block = []
 
         if val != "":
             contents.append({
@@ -57,13 +69,17 @@ def get_card_content(item: CollectionRowBlock):
                 "value": val
             })
 
-    print(contents)
+    if len(list_block) > 0:
+        contents.append({
+            "type": "list",
+            "value": list_block
+        })
+
     return contents
 
 
 def get_card_module(item: CollectionRowBlock):
-    module = item.get_property("Tags")
-    return None if len(module) < 1 else module[0]
+    return item.module
 
 
 def get_cover_level(item: CollectionRowBlock):
@@ -79,7 +95,7 @@ def __get_item_from_collection(col: list, id: str) -> CollectionRowBlock:
 
 def __change_cover(item: CollectionRowBlock, correct=None):
     if correct is None:
-        corrects = item.get_property("Correct")
+        corrects = item.correct
     else:
         corrects = correct
 
@@ -103,9 +119,9 @@ def correct(url):
         print(e)
         return {"error": True}
 
-    item.set_property("Last Got Correct", datetime.now())
-    got_correct = item.get_property("Correct")
-    item.set_property("Correct", got_correct + 1)
+    item.answered = datetime.now()
+    got_correct = item.correct
+    item.correct = got_correct + 1
 
     __change_cover(item, correct=got_correct + 1)
 
@@ -119,8 +135,8 @@ def incorrect(url):
     except:
         return {"error": True}
 
-    got_correct = item.get_property("Correct")
-    item.set_property("Correct", got_correct - 1)
+    got_correct = item.correct
+    item.correct = got_correct - 1
 
     __change_cover(item, correct=got_correct - 1)
 

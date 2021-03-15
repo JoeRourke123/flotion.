@@ -154,6 +154,12 @@ function buildAnswer(contents) {
             case "img":
                 content += `<img src="${item['value']}" class="image" /><br />`
                 break;
+            case "list":
+                content += `<ul>`;
+                for(let element of item['value']) {
+                    content += `<li>${ element }</li>`;
+                }
+                content += `</ul><br />`
         }
     }
 
