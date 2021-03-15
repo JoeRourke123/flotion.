@@ -144,6 +144,20 @@ def incorrect(url):
     return {"success": True}
 
 
+@app.route('/modules')
+def modules():
+    db = notion.get_collection_view(CARD_PAGE)
+    coll: Collection = db.collection
+    properties = coll.get_schema_properties()
+    module_list = []
+
+    for property in properties:
+        if property["slug"] == "module":
+            module_list = list(map(lambda x: x["value"], property["options"]))
+
+    return {"modules": sorted(module_list)}
+
+
 @app.route('/q/<module>')
 def question(module: str):
     db = notion.get_collection_view(CARD_PAGE)

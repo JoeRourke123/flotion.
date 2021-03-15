@@ -2,20 +2,33 @@
  *  Code for the homepage.
  */
 
-const MODULES = [
-    "CS2800", "CS2850", "CS2855", "CS2860", "CS2900", "CS2910", "IY2760"
-];
+let MODULES = [];
 
 let HOME_STEP = 0;
 
-function populateModules() {
+async function populateModules() {
     let loader = document.getElementById("loading-window");
     let moduleList = document.getElementById("module-list");
 
-    for (let module of MODULES) {
-        moduleList.innerHTML += `
-            <a class="button primary outline module-button" onclick="selectModule(this)">${module}</a>
-        `;
+    try {
+        let moduleRequest = await fetch("/modules");
+        let fetchedModules = await moduleRequest.json();
+
+        if (fetchedModules.hasOwnProperty("modules")) {
+            for (let moduleName of fetchedModules["modules"]) {
+                moduleList.innerHTML += `
+                    <a class="button primary outline module-button" onclick="selectModule(this)">${moduleName}</a>
+                `;
+            }
+
+            MODULES = fetchedModules;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+
+    if (MODULES.length < 1) {
+        moduleList.innerHTML = "<h2>No modules could be found</h2>";
     }
 
     setTimeout(() => {
@@ -156,8 +169,8 @@ function buildAnswer(contents) {
                 break;
             case "list":
                 content += `<ul>`;
-                for(let element of item['value']) {
-                    content += `<li>${ element }</li>`;
+                for (let element of item['value']) {
+                    content += `<li>${element}</li>`;
                 }
                 content += `</ul><br />`
         }
@@ -193,7 +206,7 @@ async function answerQuestion(correct) {
 function toggleOpacity() {
     let e = document.getElementById("question-window");
 
-    if(e.style.opacity !== "0") {
+    if (e.style.opacity !== "0") {
         e.style.opacity = "0";
         setTimeout(() => {
             e.classList.add("is-hidden");
