@@ -14,4 +14,4 @@ Test yourself on flashcards made in Notion
 ## To Do
 * Improve performance (limited by the API currently).
 * Create an installation script allowing user to customise their parameters.
-* Fetch modules from the "Tags" options.
+* Create a statistics page to show data on how well I've answered questions etc.
