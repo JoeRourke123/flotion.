@@ -1,2 +1,4 @@
 .idea/
 venv/
+wsgi.py
+__pycache__/
