@@ -91,6 +91,15 @@ def get_card_module(item: CollectionRowBlock):
 def get_cover_level(item: CollectionRowBlock):
     return COVER_MAPPINGS.get(item.cover, "red")
 
+def __get_modules_from_collection(coll: Collection):
+    properties = coll.get_schema_properties()
+    module_list = []
+
+    for property in properties:
+        if property["slug"] == "module":
+            module_list = list(map(lambda x: x["value"], property["options"]))
+
+    return sorted(module_list)
 
 def __get_item_from_collection(col: list, id: str) -> CollectionRowBlock:
     for item in col:
@@ -153,14 +162,8 @@ def incorrect(url):
 def modules():
     db = notion.get_collection_view(CARD_PAGE)
     coll: Collection = db.collection
-    properties = coll.get_schema_properties()
-    module_list = []
 
-    for property in properties:
-        if property["slug"] == "module":
-            module_list = list(map(lambda x: x["value"], property["options"]))
-
-    return {"modules": sorted(module_list)}
+    return {"modules": __get_modules_from_collection(coll)}
 
 
 @app.route('/q/<module>')
@@ -197,6 +200,51 @@ def question(module: str):
         populated = len(parsed_card["content"]) > 0
 
     return parsed_card
+
+
+@app.route("/s")
+def stats_data():
+    db = notion.get_collection_view(CARD_PAGE)
+    coll: Collection = db.collection
+
+    rows = coll.get_rows()
+
+    modules = __get_modules_from_collection(coll)
+    module_mapping = {m: [0, 0, 0] for m in modules}
+    module_cards = {m: 0 for m in modules}
+
+    response = {
+        "total_red": 0,
+        "total_yellow": 0,
+        "total_green": 0,
+        "total_corrects": 0,
+        "total_cards": 0,
+    }
+
+    for item in rows:
+        cover = get_cover_level(item)
+        response[f"total_{ cover }"] += 1
+        response["total_corrects"] += 0 if item.correct is None else item.correct
+        response["total_cards"] += 1
+
+        cover_index = ["red", "green", "yellow"].index(cover)
+        if item.module is not None:
+            module_mapping[item.module][cover_index] += 1
+            module_cards[item.module] += 1
+
+    for module in modules:
+        card_count = module_cards[module]
+
+        if card_count == 0:
+            card_count = 1
+
+        module_mapping[module][0] /= card_count
+        module_mapping[module][1] /= card_count
+        module_mapping[module][2] /= card_count
+
+    response["ranked_modules"] = sorted(modules, key=lambda x: module_mapping[x])
+
+    return response
 
 
 if __name__ == '__main__':
