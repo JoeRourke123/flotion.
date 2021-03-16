@@ -169,3 +169,16 @@ Home Page Stylings
     background-color: #fdfd96 !important;
     color: #fdfd96 !important;
 }
+
+.statistics-row {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.statistics-row h4 {
+    margin-right: 10px;
+    font-weight: bolder;
+    font-style: italic;
+}
