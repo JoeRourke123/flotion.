@@ -41,6 +41,11 @@ def questions():
     return render_template('quiz.html')
 
 
+@app.route('/stats')
+def stats_view():
+    return render_template('statistics.html')
+
+
 def get_card_title(item: CollectionRowBlock):
     return item.title_plaintext
 
