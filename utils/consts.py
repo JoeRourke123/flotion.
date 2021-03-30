@@ -1,0 +1,18 @@
+GREEN_LIMIT = 12
+YELLOW_LIMIT = 6
+CARD_PAGE = "https://www.notion.so/joerourke/cc94ab7b40e5445dbabf5cddf6e6863a?v=04f75288e34242798be38589207a1486"
+BLOCK_ID = "cc94ab7b-40e5-445d-babf-5cddf6e6863a"
+BLOCK_TYPE_MAPPING = {
+    "image": "img",
+    "text": "text"
+}
+BLOCK_VALUE_MAPPING = {
+    "image": "source",
+    "text": "title",
+    "bulleted_list": "title",
+}
+COVER_MAPPINGS = {
+    "/images/page-cover/solid_red.png": "red",
+    "/images/page-cover/solid_yellow.png": "yellow",
+    "/images/page-cover/solid_blue.png": "green"
+}

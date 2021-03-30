@@ -61,18 +61,18 @@ function selectModule(e) {
 function selectDifficulty(e) {
     let moduleList = document.getElementById("module-list");
 
+    for (let child of moduleList.children) {
+        if (child == e) {
+            e.classList.toggle("outline");
+        } else {
+            child.classList.add("outline");
+        }
+    }
+
     if (!e.classList.contains("outline")) {
         localStorage.setItem("difficulty", e.innerText);
     } else {
         localStorage.removeItem("difficulty");
-    }
-
-    for (let child of moduleList.children) {
-        if (child == e) {
-            child.classList.toggle("outline");
-        } else {
-            child.classList.add("outline");
-        }
     }
 }
 
