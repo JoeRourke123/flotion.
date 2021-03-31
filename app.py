@@ -9,6 +9,7 @@ from random import choice
 
 from utils.consts import CARD_PAGE
 from utils.filter import filter_cards
+from utils.filter_builder import build_filter
 from utils.modify_cards import change_cover
 from utils.card_details import get_cover_level, get_card_module, get_card_content, get_card_title, \
     get_modules_from_collection, pick_random_card
@@ -75,8 +76,14 @@ def question(card_filter: str):
     populated = False
     parsed_card = {"error": True}
 
+    split_card_filter = card_filter.split("__")
+    module_filter = None if split_card_filter[0] == "all" else split_card_filter[0]
+    understanding_filter = None if len(split_card_filter) < 2 else split_card_filter[1].lower()
+
+    filter_object = build_filter(module_filter, understanding_filter)
+
     while not populated:
-        random_item: Block = notion.pick_random_card(cards_db)
+        random_item: CollectionRowBlock = notion.pick_random_card(cards_db, query=filter_object)
 
         parsed_card = {
             "id": quote(random_item.get_browseable_url()),
