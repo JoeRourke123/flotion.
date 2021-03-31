@@ -1,6 +1,10 @@
-from notion.collection import CollectionRowBlock, Collection
+import random
 
-from utils.consts import COVER_MAPPINGS, BLOCK_VALUE_MAPPING, BLOCK_TYPE_MAPPING
+from notion.block import Block
+from notion.client import NotionClient
+from notion.collection import CollectionRowBlock, Collection, CollectionView
+
+from utils.consts import COVER_MAPPINGS, BLOCK_VALUE_MAPPING, BLOCK_TYPE_MAPPING, MAX_CARD_LIMIT
 
 
 def get_card_title(item: CollectionRowBlock):
@@ -65,3 +69,31 @@ def get_item_from_collection(col: list, id: str) -> CollectionRowBlock:
         if str(item.id) == id:
             return item
     return None
+
+
+def pick_random_card(self: NotionClient, coll_view: CollectionView, query=None) -> CollectionRowBlock:
+    if query is None:
+        query = {
+            "aggregations": [{"aggregator": "count"}]
+        }
+
+    results = self.post("queryCollection", data={
+        "collectionId": coll_view.collection.id,
+        "collectionViewId": coll_view.id,
+        "query": query,
+        "loader": {
+            "type": "table",
+            "limit": MAX_CARD_LIMIT,
+            "searchQuery": "",
+            "userTimeZone": "Europe/London",
+            "loadContentCover": True
+        }
+    })
+
+    parsed = results.json()["result"]
+    block_ids = parsed["blockIds"]
+    random_item = random.choice(block_ids)
+
+    print(random_item)
+
+    return self.get_block(random_item)

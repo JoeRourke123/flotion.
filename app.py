@@ -1,21 +1,20 @@
-import time
 from datetime import datetime
 from os import environ
 from urllib.parse import quote, unquote
 from flask import Flask, render_template
+from notion.block import Block
 from notion.client import NotionClient
 from notion.collection import CollectionView, Collection, CollectionRowBlock
 from random import choice
 
-from utils.consts import CARD_PAGE, BLOCK_ID
-from utils.exporter import export_to_html
-from utils.fetcher_thread import FetcherThread
+from utils.consts import CARD_PAGE
 from utils.filter import filter_cards
 from utils.modify_cards import change_cover
 from utils.card_details import get_cover_level, get_card_module, get_card_content, get_card_title, \
-    get_modules_from_collection
+    get_modules_from_collection, pick_random_card
 from utils.stats import get_stats
 
+NotionClient.pick_random_card = pick_random_card
 
 app = Flask(__name__)
 app.secret_key = environ.get("FLOTION_TOKEN", None)
@@ -73,13 +72,12 @@ def modules():
 
 @app.route('/q/<card_filter>')
 def question(card_filter: str):
-    filtered = filter_cards(cards, card_filter)
-
     populated = False
     parsed_card = {"error": True}
 
-    while not populated and len(filtered) > 0:
-        random_item: CollectionRowBlock = choice(filtered, )
+    while not populated:
+        random_item: Block = notion.pick_random_card(cards_db)
+
         parsed_card = {
             "id": quote(random_item.get_browseable_url()),
             "title": get_card_title(random_item),
@@ -103,12 +101,4 @@ def stats_data():
 
 
 if __name__ == '__main__':
-    import sys
-    args = sys.argv[1:]
-    print(args)
-
-    if len(args) > 0 and args[0] == "export":
-        print("Exporting to HTML")
-        export_to_html(notion, BLOCK_ID)
-    else:
-        app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0')

@@ -1,7 +1,7 @@
 GREEN_LIMIT = 12
 YELLOW_LIMIT = 6
+MAX_CARD_LIMIT = 2000
 CARD_PAGE = "https://www.notion.so/joerourke/cc94ab7b40e5445dbabf5cddf6e6863a?v=04f75288e34242798be38589207a1486"
-BLOCK_ID = "cc94ab7b-40e5-445d-babf-5cddf6e6863a"
 BLOCK_TYPE_MAPPING = {
     "image": "img",
     "text": "text"
