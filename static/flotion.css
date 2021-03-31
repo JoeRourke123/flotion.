@@ -182,3 +182,7 @@ Home Page Stylings
     font-weight: bolder;
     font-style: italic;
 }
+
+img {
+    max-height: 60vh;
+}

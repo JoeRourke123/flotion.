@@ -186,21 +186,12 @@ async function answerQuestion(correct) {
 
     if (item.hasOwnProperty("id")) {
 
-        const doCorrect = await fetch("/c/" + item["id"], {
+        const doCorrect = fetch("/c/" + item["id"], {
             method: "POST"
         });
-
-        if (doCorrect.ok) {
-            let resp = await doCorrect.json();
-
-            if (!resp.hasOwnProperty("error")) {
-                await getQuestion();
-                return;
-            }
-        }
     }
 
-    loader.classList.remove("is-loading");
+    getQuestion();
 }
 
 function toggleOpacity() {
