@@ -186,7 +186,7 @@ async function answerQuestion(correct) {
 
     if (item.hasOwnProperty("id")) {
 
-        const doCorrect = await fetch("/" + (correct ? "c" : "w") + "/" + item["id"], {
+        const doCorrect = await fetch("/c/" + item["id"], {
             method: "POST"
         });
 
