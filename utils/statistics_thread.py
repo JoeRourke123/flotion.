@@ -42,7 +42,7 @@ def get_statistics(client: NotionClient, db: CollectionView):
         "total_cards": 0,
         "module_understandings": [[0,0,0] for m in modules],
         "module_totals": [],
-        "ordered_modules": modules
+        "modules": modules
     }
 
     red_cards_count = []
@@ -65,15 +65,15 @@ def get_statistics(client: NotionClient, db: CollectionView):
         stats["module_understandings"][x] = [
             red_cards_count[x], yellow_cards_count[x], green_cards_count[x]
         ]
+
+        module_total_cards = sum(stats["module_understandings"][x])
+
         stats["total_red"] += red_cards_count[x]
         stats["total_yellow"] += yellow_cards_count[x]
         stats["total_green"] += green_cards_count[x]
-
-        module_total_cards = sum(stats["module_understandings"][x])
+        stats["total_cards"] += module_total_cards
         stats["module_totals"].append(module_total_cards)
 
         module_order_map[module] = [i / module_total_cards for i in stats["module_understandings"][x]]
-
-    stats["ordered_modules"].sort(key=lambda mod: module_order_map[mod], reverse=True)
 
     return stats
