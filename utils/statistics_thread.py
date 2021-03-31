@@ -28,7 +28,7 @@ class StatisticsThread(Thread):
             for k, v in stats.items():
                 self.statistics[k] = v
 
-            print("Waiting for 10 minutes.")
+            print("Waiting for 3 minutes.")
             time.sleep(60 * 3)
 
 
