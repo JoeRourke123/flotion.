@@ -32,10 +32,6 @@
 </div>
 <div class="is-full-screen is-full-width is-horizontal-align is-vertical-align" id="answer">
     <div class="statistics-row">
-        <h4>CORRECT ANSWERS: </h4>
-        <h1 id="total_corrects"></h1>
-    </div>
-    <div class="statistics-row">
         <h4><span style="color: indianred">RED</span> CARDS: </h4>
         <h1 id="total_red">43/100</h1>
     </div>
@@ -48,8 +44,8 @@
         <h1 id="total_green">43/100</h1>
     </div>
     <div class="statistics-row" style="margin-top: 20px;">
-        <h4 style="margin-right: 30px">RANKED MODULES: </h4>
-        <h3 id="ranked_modules"></h3>
+        <h4 style="margin-right: 30px">MODULE UNDERSTANDINGS: </h4>
+        <h3 id="modules"></h3>
     </div>
 </div>
 <script src="{{ url_for('static', filename='statistics.js') }}"></script>

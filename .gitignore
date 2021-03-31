@@ -2,3 +2,7 @@
 venv/
 wsgi.py
 __pycache__/
+
+export.zip
+flotion_export/
+flotion.db
