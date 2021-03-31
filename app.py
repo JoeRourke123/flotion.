@@ -2,20 +2,18 @@ from datetime import datetime
 from os import environ
 from urllib.parse import quote, unquote
 from flask import Flask, render_template
-from notion.block import Block
 from notion.client import NotionClient
 from notion.collection import CollectionView, Collection, CollectionRowBlock
-from random import choice
 
 from utils.consts import CARD_PAGE
-from utils.filter import filter_cards
 from utils.filter_builder import build_filter
 from utils.modify_cards import change_cover
 from utils.card_details import get_cover_level, get_card_module, get_card_content, get_card_title, \
-    get_modules_from_collection, pick_random_card
-from utils.stats import get_stats
+    get_modules_from_collection, pick_random_card, count_results, get_module_property_id, get_correct_property_id
+from utils.statistics_thread import StatisticsThread
 
 NotionClient.pick_random_card = pick_random_card
+NotionClient.count_results = count_results
 
 app = Flask(__name__)
 app.secret_key = environ.get("FLOTION_TOKEN", None)
@@ -25,10 +23,10 @@ notion = NotionClient(
 )
 
 cards_db: CollectionView = notion.get_collection_view(CARD_PAGE)
-cards = cards_db.collection.get_rows()
+statistics = {}
 
-# fetcher = FetcherThread()
-# fetcher.start()
+fetcher = StatisticsThread(notion, cards_db, statistics)
+fetcher.start()
 
 
 @app.route('/')
@@ -80,10 +78,20 @@ def question(card_filter: str):
     module_filter = None if split_card_filter[0] == "all" else split_card_filter[0]
     understanding_filter = None if len(split_card_filter) < 2 else split_card_filter[1].lower()
 
-    filter_object = build_filter(module_filter, understanding_filter)
+    module_id = get_module_property_id(cards_db.collection)
+    correct_id = get_correct_property_id(cards_db.collection)
+    filter_object = build_filter(
+        module_filter,
+        understanding_filter,
+        module_id=module_id,
+        correct_id=correct_id
+    )
 
     while not populated:
         random_item: CollectionRowBlock = notion.pick_random_card(cards_db, query=filter_object)
+
+        if random_item is None:
+            break
 
         parsed_card = {
             "id": quote(random_item.get_browseable_url()),
@@ -99,12 +107,7 @@ def question(card_filter: str):
 
 @app.route("/s")
 def stats_data():
-    rows = cards
-    print(len(rows))
-
-    modules = get_modules_from_collection(cards_db.collection)
-
-    return get_stats(rows, modules)
+    return statistics
 
 
 if __name__ == '__main__':

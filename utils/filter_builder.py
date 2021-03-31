@@ -1,7 +1,7 @@
 from utils.consts import GREEN_LIMIT, YELLOW_LIMIT
 
 
-def build_filter(module: str, understanding: str) -> dict:
+def build_filter(module: str, understanding: str, module_id="module", correct_id="correct") -> dict:
     filters = []
 
     if module is not None:
@@ -13,7 +13,7 @@ def build_filter(module: str, understanding: str) -> dict:
                     "value": module
                 }
             },
-            "property": "module"
+            "property": module_id
         })
     if understanding is not None:
         lower_limit = {
@@ -32,7 +32,7 @@ def build_filter(module: str, understanding: str) -> dict:
                         "value": lower_limit
                     }
                 },
-                "property": "SDbJ"
+                "property": correct_id
             })
         if upper_limit >= 0:
             filters.append({
@@ -43,7 +43,7 @@ def build_filter(module: str, understanding: str) -> dict:
                         "value": upper_limit
                     }
                 },
-                "property": "correct"
+                "property": correct_id
             })
 
     return {

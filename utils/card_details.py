@@ -92,8 +92,48 @@ def pick_random_card(self: NotionClient, coll_view: CollectionView, query=None) 
 
     parsed = results.json()["result"]
     block_ids = parsed["blockIds"]
+
+    if parsed["total"] == 0:
+        return None
+
     random_item = random.choice(block_ids)
 
     print(random_item)
 
     return self.get_block(random_item)
+
+
+def count_results(self: NotionClient, coll_view: CollectionView, query=None) -> CollectionRowBlock:
+    if query is None:
+        query = {
+            "aggregations": [{"aggregator": "count"}]
+        }
+
+    results = self.post("queryCollection", data={
+        "collectionId": coll_view.collection.id,
+        "collectionViewId": coll_view.id,
+        "query": query,
+        "loader": {
+            "type": "table",
+            "limit": MAX_CARD_LIMIT,
+            "searchQuery": "",
+            "userTimeZone": "Europe/London",
+            "loadContentCover": True
+        }
+    })
+
+    parsed = results.json()["result"]
+
+    return parsed["total"]
+
+
+def get_module_property_id(collection: Collection):
+    for prop in collection.get_schema_properties():
+        if prop["slug"] == "module":
+            return prop["id"]
+
+
+def get_correct_property_id(collection: Collection):
+    for prop in collection.get_schema_properties():
+        if prop["slug"] == "correct":
+            return prop["id"]
