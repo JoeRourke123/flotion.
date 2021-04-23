@@ -12,6 +12,7 @@ Test yourself on flashcards made in Notion
 * Replace CARD_PAGE with the URL of your flashcards database
 
 ## To Do
-* Improve performance (limited by the API currently).
-* Create an installation script allowing user to customise their parameters.
-* Create a statistics page to show data on how well I've answered questions etc.
+* Refactor to use Notion API once pubilc beta out
+* Make it a service users can sign up for with automatic setup of Flashcards page etc
+* Fix bug which causes difficulty colour to change when it hits 4?
+* Add back button in to module/difficulty selection
