@@ -16,3 +16,5 @@ Test yourself on flashcards made in Notion
 * Make it a service users can sign up for with automatic setup of Flashcards page etc
 * Fix bug which causes difficulty colour to change when it hits 4?
 * Add back button in to module/difficulty selection
+* Add in font stylings (bold, italic, underline, etc)
+* Add in other Flotion blocks (numbered list and equations)
