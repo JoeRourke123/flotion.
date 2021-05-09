@@ -8,8 +8,7 @@ Test yourself on flashcards made in Notion
 ## How to install
 * Set a FLOTION_TOKEN environment variable to be your Notion token (fetched from DevTools in Notion.so web app).
 * Make a flashcards database page which has a default image cover (of red,yellow,or blue), a "Correct" number parameter, a select "Module" parameter, and a date/time "Answered" parameter.
-* Replace in the flotion.js file, the MODULES const with your possible tags.
-* Replace CARD_PAGE with the URL of your flashcards database
+* Replace CARD_PAGE with the URL of your flashcards database, in app.py
 
 ## To Do
 * Refactor to use Notion API once pubilc beta out
@@ -18,3 +17,4 @@ Test yourself on flashcards made in Notion
 * Add back button in to module/difficulty selection
 * Add in font stylings (bold, italic, underline, etc)
 * Add in other Flotion blocks (numbered list and equations)
+* Allow for more granular control of the stats page (i.e. selecting specific modules to view stats from)
