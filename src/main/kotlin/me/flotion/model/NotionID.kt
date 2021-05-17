@@ -1,4 +1,4 @@
-package me.flotion.models
+package me.flotion.model
 
 data class NotionID (val id: String) {
 	/**
