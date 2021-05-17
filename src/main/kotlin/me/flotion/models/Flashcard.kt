@@ -12,7 +12,7 @@ data class Flashcard(
 	/**
 	 * Increments the correct property on the Notion database.
 	 */
-	fun gotCorrect() {
+	fun incrementCorrect() {
 
 	}
 
