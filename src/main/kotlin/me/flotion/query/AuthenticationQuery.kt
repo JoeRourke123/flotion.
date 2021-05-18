@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import kotlin.random.Random
 
 @Component
-class AuthenticationMutation : Query {
+class AuthenticationQuery : Query {
 	@GraphQLDescription("generates URL for user to login to Notion, provide access, and get redirect URI")
 	fun generateAuthURL(): String {
 		val uniqueState = Random.nextLong().toString()
