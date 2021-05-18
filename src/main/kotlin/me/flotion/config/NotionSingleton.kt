@@ -1,4 +1,4 @@
-package me.flotion.model
+package me.flotion.config
 
 import org.jraf.klibnotion.client.*
 import org.jraf.klibnotion.model.oauth.OAuthCredentials
@@ -19,19 +19,22 @@ object NotionSingleton {
 	}
 
 	val client: NotionClient by lazy {
+		buildNotionClient()
+	}
+
+	private fun buildNotionClient(auth: Authentication= authentication) =
 		NotionClient.newInstance(
 			ClientConfiguration(
-				authentication,
+				auth,
 				HttpConfiguration(
 					// Uncomment to see more logs
 					// loggingLevel = HttpLoggingLevel.BODY,
 					loggingLevel = HttpLoggingLevel.INFO,
 					// This is only needed to debug with, e.g., Charles Proxy
-					httpProxy = if(System.getenv("flotion_redirect_uri") == null) HttpProxy("localhost", 8888) else null,
-					// Can be useful in certain circumstances, but unwise to use in production
-					bypassSslChecks = System.getenv("flotion_redirect_uri") == null
+					bypassSslChecks = true
 				)
 			)
 		)
-	}
+
+	fun userClient(token: String) = buildNotionClient(Authentication(token))
 }
