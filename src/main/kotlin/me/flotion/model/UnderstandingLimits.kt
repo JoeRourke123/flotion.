@@ -10,10 +10,12 @@ data class UnderstandingLimits private constructor(
 ) {
 	companion object {
 		fun loadFromDB(token: String): UnderstandingLimits {
-			val yellowLim = RedisSingleton.db.hget(token, YELLOW_LIM_KEY)
-			val greenLim = RedisSingleton.db.hget(token, GREEN_LIM_KEY)
+			RedisSingleton.getJedisInstance().use { db ->
+				val yellowLim = db.hget(token, YELLOW_LIM_KEY)
+				val greenLim = db.hget(token, GREEN_LIM_KEY)
 
-			return UnderstandingLimits(yellowLim.toInt(), greenLim.toInt())
+				return UnderstandingLimits(yellowLim.toInt(), greenLim.toInt())
+			}
 		}
 	}
 

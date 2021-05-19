@@ -3,6 +3,8 @@ package me.flotion.query
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Query
 import me.flotion.config.NotionSingleton
+import me.flotion.context.NotionContext
+import me.flotion.model.NotionUser
 import org.springframework.stereotype.Component
 import kotlin.random.Random
 
@@ -13,4 +15,7 @@ class AuthenticationQuery : Query {
 		val uniqueState = Random.nextLong().toString()
 		return NotionSingleton.client.oAuth.getUserPromptUri(oAuthCredentials = NotionSingleton.oAuthCredentials, uniqueState = uniqueState)
 	}
+
+	@GraphQLDescription("returns details of the logged in user")
+	fun userDetails(context: NotionContext): NotionUser? = context.user
 }

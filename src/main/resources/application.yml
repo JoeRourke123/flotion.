@@ -1,3 +1,9 @@
 graphql:
   packages:
     - "me.flotion"
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
