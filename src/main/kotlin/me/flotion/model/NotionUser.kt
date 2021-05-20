@@ -1,12 +1,13 @@
 package me.flotion.model
 
+import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import me.flotion.config.FLOTION_SECRET
 import java.security.Key
 
 data class NotionUser constructor(
-	private val accessToken: String,
+	@GraphQLIgnore val accessToken: String,
 	val email: String,
 	val firstName: String,
 

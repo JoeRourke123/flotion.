@@ -1,12 +1,11 @@
 package me.flotion.model
 
-import me.flotion.config.GREEN_LIM_KEY
-import me.flotion.config.RedisSingleton
-import me.flotion.config.YELLOW_LIM_KEY
+import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
+import me.flotion.config.*
 
-data class UnderstandingLimits private constructor(
-	val yellowLimit: Int,
-	val greenLimit: Int,
+data class UnderstandingLimits constructor(
+	val yellowLimit: Int = YELLOW_LIMIT,
+	val greenLimit: Int = GREEN_LIMIT,
 ) {
 	companion object {
 		fun loadFromDB(token: String): UnderstandingLimits {
@@ -20,4 +19,12 @@ data class UnderstandingLimits private constructor(
 	}
 
 	fun isValid(): Boolean = yellowLimit < greenLimit
+
+	@GraphQLIgnore
+	fun saveToUser(token: String) {
+		RedisSingleton.getJedisInstance().use { db ->
+			db.hset(token, YELLOW_LIM_KEY, yellowLimit.toString())
+			db.hset(token, GREEN_LIM_KEY, greenLimit.toString())
+		}
+	}
 }
