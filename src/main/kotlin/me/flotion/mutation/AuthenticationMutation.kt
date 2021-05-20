@@ -38,7 +38,7 @@ class AuthenticationMutation : Mutation {
 			return AuthorisationResponse(400, message = ResponseMessages.EXPIRED_TOKEN.message)
 		} catch (e: Exception) {
 			println(e.message)
-			return AuthorisationResponse(500, message = ResponseMessages.AUTH_ERROR.message)
+			return AuthorisationResponse(500, message = e.message ?: ResponseMessages.AUTH_ERROR.message)
 		}
 
 		val userClient = NotionSingleton.userClient(token)
@@ -54,7 +54,7 @@ class AuthenticationMutation : Mutation {
 				AuthorisationResponse(200, user = user.clientDetails)
 			} catch (e: Exception) {
 				print(e)
-				AuthorisationResponse(500, message = ResponseMessages.AUTH_ERROR.message)
+				AuthorisationResponse(500, message = e.message ?: ResponseMessages.AUTH_ERROR.message)
 			}
 		}
 	}
