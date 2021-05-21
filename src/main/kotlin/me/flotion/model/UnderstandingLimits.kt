@@ -27,4 +27,10 @@ data class UnderstandingLimits constructor(
 			db.hset(token, GREEN_LIM_KEY, greenLimit.toString())
 		}
 	}
+
+	fun getUnderstandingLevel(corrects: Int): Understanding = when {
+		(corrects < yellowLimit) -> Understanding.RED
+		(corrects < greenLimit) -> Understanding.YELLOW
+		else -> Understanding.GREEN
+	}
 }

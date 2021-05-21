@@ -1,32 +1,59 @@
 package me.flotion.model
 
-data class NotionID (val id: String) {
+import me.flotion.config.CORRECT_PAGE_KEY
+import me.flotion.config.NotionSingleton
+import org.jraf.klibnotion.model.page.Page
+import org.jraf.klibnotion.model.property.value.PropertyValueList
+import toFormattedString
+import java.lang.Exception
+
+data class NotionID(val id: String) {
 	/**
 	 * Returns the ID in a URL format for easy access to pages.
 	 */
-	fun getURL() = "https://notion.so/$id"
-}
+	val url: String = "https://notion.so/$id"
 
-data class Flashcard(
-	val id: NotionID,
-	val correct: Int,
-	val topic: String,
-	val coverURL: String,
+	suspend fun getPage(user: NotionUser): Page {
+		val client = NotionSingleton.userClient(user.accessToken)
 
-	val question: String,
-	val content: String
-) {
-	/**
-	 * Increments the correct property on the Notion database.
-	 */
-	fun incrementCorrect() {
-
+		return client.pages.getPage(id)
 	}
 
-	/**
-	 * Updates the cover of the card on the Notion database.
-	 */
-	private fun updateCover() {
+	suspend fun getContents(user: NotionUser): String {
+		val client = NotionSingleton.userClient(user.accessToken)
 
+		val blocks = client.blocks.getAllBlockListRecursively(id)
+
+		return blocks.toFormattedString()
+	}
+}
+
+enum class Understanding {
+	RED, YELLOW, GREEN
+}
+
+class Flashcard(
+	private val cardID: NotionID,
+	private val question: String,
+	private val user: NotionUser,
+	private val answer: String,
+	private val correct: Int,
+	page: Page
+) : Page by page {
+	data class FlashcardDetails(val id: String, val question: String, val answer: String, val understanding: Understanding)
+
+	val cardDetails: FlashcardDetails
+		get() = FlashcardDetails(cardID.id, question, answer, understanding)
+
+	private val understanding: Understanding
+		get() {
+			return user.limits.getUnderstandingLevel(correct)
+		}
+
+	suspend fun incrementCorrect() {
+		val token = user.accessToken
+		val client = NotionSingleton.userClient(token)
+
+		client.pages.updatePage(cardID.id, PropertyValueList().number(CORRECT_PAGE_KEY, correct + 1))
 	}
 }

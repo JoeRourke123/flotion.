@@ -40,7 +40,11 @@ object NotionSingleton {
 
 	suspend fun getUserCardDB(token: String): String? {
 		val client: NotionClient = NotionSingleton.userClient(token)
-		val databases = client.databases.getDatabaseList().results
+
+		val databases = client.search.searchDatabases().results
+
+		print(databases)
+
 		val cardDatabase = databases.find { it.title.plainText == CARD_DATABASE_TITLE }
 
 		return cardDatabase?.id

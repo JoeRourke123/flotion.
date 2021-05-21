@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Query
 import me.flotion.config.NotionSingleton
 import me.flotion.context.NotionContext
+import me.flotion.model.NotionClientDetails
 import me.flotion.model.NotionUser
 import org.springframework.stereotype.Component
 import kotlin.random.Random
@@ -17,5 +18,5 @@ class AuthenticationQuery : Query {
 	}
 
 	@GraphQLDescription("returns details of the logged in user")
-	fun userDetails(context: NotionContext): NotionUser? = context.user
+	fun userDetails(context: NotionContext): NotionClientDetails? = context.user?.clientDetails
 }

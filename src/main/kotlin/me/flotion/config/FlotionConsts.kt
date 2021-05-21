@@ -9,6 +9,8 @@ const val CARD_DB_KEY = "cards_database"
 
 const val CORRECT_PAGE_KEY = "Correct"
 const val CARD_DATABASE_TITLE = "Flashcards"
+const val MODULE_SELECT_KEY = "Module(s)"
+const val UNDERSTANDING_SELECT_KEY = "Understanding"
 
 val FLOTION_SECRET = System.getenv("flotion_client_secret")
 
@@ -21,5 +23,7 @@ enum class ResponseMessages(val message: String) {
 	MALFORMED_CARD("Hmm - this card doesn't seem to match the format we were expecting! Maybe try recopying the template?"),
 	MISSING_CARD("We can't seem to find the card you specified - has it been deleted?"),
 	CARD_DB_NOT_FOUND("Your flashcards database could not be found - did you tick the Flotion page when authorising?"),
+	NO_CARDS_HERE("We can't find the cards you're looking for! Try tweaking your parameters."),
+	SERVER_ERROR("Um... Houston we have a (server) problem."),
 	SUCCESS("OK")
 }
