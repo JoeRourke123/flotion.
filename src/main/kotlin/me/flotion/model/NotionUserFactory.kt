@@ -33,7 +33,7 @@ abstract class NotionUserFactory {
 				setDefaultValues(token)
 			}
 
-//			val modules = ExcludedModules.loadFromDB(token)
+			val modules = ExcludedModules.loadFromDB(token)
 			val lims = UnderstandingLimits.loadFromDB(token)
 
 			return NotionUser(
@@ -41,7 +41,7 @@ abstract class NotionUserFactory {
 				person.email,
 				person.name,
 				lims,
-//				modules
+				modules
 			)
 		}
 

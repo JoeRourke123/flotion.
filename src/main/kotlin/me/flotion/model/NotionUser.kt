@@ -13,7 +13,7 @@ data class NotionUser constructor(
 	val firstName: String,
 
 	val limits: UnderstandingLimits,
-//	val excludedModules: ExcludedModules
+	val excludedModules: ExcludedModules
 ) {
 	val databaseID: String
 		get() {
