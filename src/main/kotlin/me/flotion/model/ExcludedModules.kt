@@ -15,7 +15,9 @@ class ExcludedModules(val modules: ArrayList<String>) : List<String> by modules 
 	fun saveToDB(token: String) {
 		RedisSingleton.getJedisInstance().use { db ->
 			val valuesCount = db.llen("$token#modules")
-			db.lpop("$token#modules", valuesCount.toInt())
+			for (i in valuesCount downTo 1) {
+				db.lpop("$token#modules")
+			}
 
 			for (m in modules) {
 				db.lpush("$token#modules", m)
