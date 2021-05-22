@@ -7,6 +7,7 @@ import me.flotion.context.NotionContext
 import me.flotion.exceptions.MalformedCardException
 import me.flotion.exceptions.UnauthorisedUserException
 import org.jraf.klibnotion.model.page.Page
+import org.jraf.klibnotion.model.property.SelectOption
 import org.jraf.klibnotion.model.property.value.MultiSelectPropertyValue
 import org.jraf.klibnotion.model.richtext.RichTextList
 
@@ -38,8 +39,8 @@ class FlashcardFactory {
 
 			val corrects: Int = ((page.propertyValues.find { it.name == CORRECT_PAGE_KEY }?.value ?: 0) as Long).toInt()
 
-			val moduleProperty = (page.propertyValues.find { it.name == MODULE_SELECT_KEY }?.value ?: throw MalformedCardException(ResponseMessages.MALFORMED_CARD.message)) as MultiSelectPropertyValue
-			val modules = moduleProperty.value.map { it.name }
+			val moduleProperty = (page.propertyValues.find { it.name == MODULE_SELECT_KEY }?.value ?: throw MalformedCardException(ResponseMessages.MALFORMED_CARD.message)) as ArrayList<SelectOption>
+			val modules = moduleProperty.map { it.name }
 
 			return Flashcard(
 				notionID,

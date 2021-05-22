@@ -32,6 +32,9 @@ class StatisticsQuery : Query {
 		var overallRed: Int? = null, var overallYellow: Int? = null, var overallGreen: Int? = null
 	)
 
+	/**
+	 * Builds the query for fetching all cards from database, except those excluded in the filter list
+	 */
 	private suspend fun buildCardQuery(
 		user: NotionUser,
 		filters: Array<DatabaseQueryPropertyFilter.MultiSelect>,
@@ -46,12 +49,14 @@ class StatisticsQuery : Query {
 	suspend fun getStats(hiddenModules: List<String>, context: NotionContext): StatsResponse {
 		if (context.user == null) return StatsResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
 
-		val modules = context.user.getAllModules()
+		val hiddenSet = setOf(*hiddenModules.toTypedArray())
+		val modules = context.user.getAllModules().filter { it !in hiddenSet }
 
 		val redModuleMapping = HashMap<String, Int>()
 		val yellowModuleMapping = HashMap<String, Int>()
 		val greenModuleMapping = HashMap<String, Int>()
 
+		// Build the filters to exclude from the stats
 		val filters = hiddenModules.map {
 			DatabaseQueryPropertyFilter.MultiSelect(
 				MODULE_SELECT_KEY,
@@ -59,14 +64,18 @@ class StatisticsQuery : Query {
 			)
 		}.toTypedArray()
 
+		// Gets all the cards in the user's flashcard database
 		var cardQueryResponse = buildCardQuery(context.user, filters)
 		val allCards = ArrayList<Page>()
+		allCards.addAll(cardQueryResponse.results)
 
+		// Continues through the different pages also
 		while (cardQueryResponse.nextPagination != null) {
-			allCards += cardQueryResponse.results
 			cardQueryResponse = buildCardQuery(context.user, filters, cardQueryResponse.nextPagination)
+			allCards.addAll(cardQueryResponse.results)
 		}
 
+		// Keeps count of all the cards - so unnecessary iterations aren't required.
 		var overallCardCount = 0
 
 		for (page in allCards) {
@@ -81,12 +90,14 @@ class StatisticsQuery : Query {
 			overallCardCount++
 		}
 
+		// Get the total number of different understanding levels from the mappings
 		val totalReds = redModuleMapping.values.sum()
 		val totalYellows = yellowModuleMapping.values.sum()
 		val totalGreens = greenModuleMapping.values.sum()
 
 		val CARD_LABEL = "No. of cards"
 
+		// Build the response data using the included modules and mappings
 		return StatsResponse(
 			modules = modules,
 			moduleRed = modules.map { StatData(CARD_LABEL, it, redModuleMapping[it] ?: 0) },
