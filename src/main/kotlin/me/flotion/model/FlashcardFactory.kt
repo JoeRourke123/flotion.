@@ -22,6 +22,15 @@ class FlashcardFactory {
 			return buildCard(page, context)
 		}
 
+		suspend fun buildCardWithoutContents(id: String, context: NotionContext): Flashcard {
+			val notionID = NotionID(id)
+			val page: Page = notionID.getPage(
+				context.user ?: throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message)
+			)
+
+			return buildCardWithoutContents(page, context)
+		}
+
 		suspend fun buildCard(page: Page, context: NotionContext) : Flashcard {
 			val notionID = NotionID(page.id)
 			val pageContents: String = notionID.getContents(context.user ?: throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message))

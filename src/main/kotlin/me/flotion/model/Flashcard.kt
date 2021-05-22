@@ -38,7 +38,7 @@ class Flashcard(
 	private val user: NotionUser,
 	private val answer: String,
 	private val modules: List<String>,
-	private val correct: Int,
+	private var correct: Int,
 	page: Page
 ) : Page by page {
 	data class FlashcardDetails(val id: String, val question: String, val answer: String, val modules: List<String>, val understanding: Understanding)
@@ -55,6 +55,6 @@ class Flashcard(
 		val token = user.accessToken
 		val client = NotionSingleton.userClient(token)
 
-		client.pages.updatePage(cardID.id, PropertyValueList().number(CORRECT_PAGE_KEY, correct + 1))
+		client.pages.updatePage(cardID.id, PropertyValueList().number(CORRECT_PAGE_KEY, ++correct))
 	}
 }

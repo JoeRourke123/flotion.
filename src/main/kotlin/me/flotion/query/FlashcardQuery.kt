@@ -56,9 +56,9 @@ class FlashcardQuery : Query {
 			FlashcardResponse(card = FlashcardFactory.buildCard(selectedPage, context).cardDetails)
 		} catch(exc: UnauthorisedUserException) {
 			FlashcardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
-//		} catch(exc: Exception) {
-//			println(exc.message)
-//			FlashcardResponse(500, ResponseMessages.SERVER_ERROR.message)
+		} catch(exc: Exception) {
+			println(exc.message)
+			FlashcardResponse(500, ResponseMessages.SERVER_ERROR.message)
 		}
 	}
 }

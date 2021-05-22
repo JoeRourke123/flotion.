@@ -6,6 +6,8 @@ import me.flotion.config.CORRECT_PAGE_KEY
 import me.flotion.config.NotionSingleton
 import me.flotion.config.ResponseMessages
 import me.flotion.context.NotionContext
+import me.flotion.model.Flashcard
+import me.flotion.model.FlashcardFactory
 import org.jraf.klibnotion.client.NotionClient
 import org.jraf.klibnotion.model.property.value.PropertyValueList
 import org.springframework.stereotype.Component
@@ -15,28 +17,17 @@ class CorrectCardMutation : Mutation {
 	class CorrectCardResponse(
 		val response: Int = 200,
 		val message: String = ResponseMessages.SUCCESS.message,
-		val card: String? = null
+		val card: Flashcard.FlashcardDetails? = null
 	)
 
 	@GraphQLDescription("marks a specified card as having been answered correctly")
 	suspend fun gotCorrect(card: String, context: NotionContext): CorrectCardResponse {
 		return if (context.user != null) {
-			val userToken: String = context.user.accessToken
-			val client: NotionClient = NotionSingleton.userClient(userToken)
-
 			try {
-				// Find the current correct value in the card's page.
-				val currentCorrect: Int? =
-					client.pages.getPage(card).propertyValues.find { it.name == CORRECT_PAGE_KEY }?.value as Int?
+				val flashcard = FlashcardFactory.buildCardWithoutContents(card, context)
+				flashcard.incrementCorrect()
 
-				if (currentCorrect == null) {
-					CorrectCardResponse(400, ResponseMessages.MALFORMED_CARD.message)
-				} else {
-					client.pages.updatePage(card, PropertyValueList().number(CORRECT_PAGE_KEY, currentCorrect + 1))
-
-					// Successful response.
-					CorrectCardResponse(card = card)
-				}
+				CorrectCardResponse(card = flashcard.cardDetails)
 			} catch (exc: Exception) {
 				CorrectCardResponse(404, ResponseMessages.MISSING_CARD.message)
 			}
