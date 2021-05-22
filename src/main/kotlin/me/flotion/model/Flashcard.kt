@@ -37,13 +37,14 @@ class Flashcard(
 	private val question: String,
 	private val user: NotionUser,
 	private val answer: String,
+	private val modules: List<String>,
 	private val correct: Int,
 	page: Page
 ) : Page by page {
-	data class FlashcardDetails(val id: String, val question: String, val answer: String, val understanding: Understanding)
+	data class FlashcardDetails(val id: String, val question: String, val answer: String, val modules: List<String>, val understanding: Understanding)
 
 	val cardDetails: FlashcardDetails
-		get() = FlashcardDetails(cardID.id, question, answer, understanding)
+		get() = FlashcardDetails(cardID.id, question, answer, modules, understanding)
 
 	private val understanding: Understanding
 		get() {
