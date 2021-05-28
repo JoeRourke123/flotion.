@@ -99,7 +99,7 @@
   transition: opacity 0.5s ease-in-out;
 }
 
-.question, .answer {
+.question, .answer, .drawing {
   position: absolute !important;
   top: 0;
   left: 0;
@@ -111,7 +111,12 @@
 }
 
 .question {
-  z-index: 99;
+  z-index: 15;
+}
+
+.drawing {
+  z-index: -100;
+  opacity: 0;
 }
 
 .answer {
@@ -128,4 +133,31 @@
   left: 0;
   right: 0;
   z-index: 10;
+
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.drawingButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+}
+
+@media screen and (max-width: 768px) {
+  .moreButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+  }
+}
+@media screen and (min-width: 769px) {
+  .moreButton {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 100;
+  }
 }

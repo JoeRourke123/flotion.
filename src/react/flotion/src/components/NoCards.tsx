@@ -1,14 +1,11 @@
 import {FC} from "react";
 import {EuiFlexGroup, EuiFlexItem, EuiText} from "@elastic/eui";
+import React from "react";
 
 const NoCards: FC = () => {
-    return <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-            <EuiText>
-                <h1>uh oh, we couldn't find any cards matching those parameters.</h1>
-            </EuiText>
-        </EuiFlexItem>
-    </EuiFlexGroup>
+    return <div className="centeredContainer">
+        <h1>uh oh, we couldn't find any cards matching those parameters.</h1>
+    </div>
 };
 
 export default NoCards;
