@@ -14,7 +14,7 @@ object NotionSingleton {
 			clientSecret = System.getenv("flotion_client_secret")
 				?: throw MissingEnvironmentVariableException("No client secret env. var set"),
 			redirectUri = System.getenv("flotion_redirect_uri")
-				?: "http://localhost:5000/auth"    // Gets redirect URL from env. var if production, but uses localhost otherwise
+				?: "http://localhost:3000/auth"    // Gets redirect URL from env. var if production, but uses localhost otherwise
 		)
 	}
 

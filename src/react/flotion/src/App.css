@@ -1,0 +1,131 @@
+:root {
+  --pink: #FFA4D8;
+}
+
+.logo {
+  width: 128px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.third {
+  width: 33%;
+  text-align: center;
+}
+
+.container {
+  padding: 40px;
+}
+
+.todoHeader {
+  color: #859de5;
+}
+
+.selectedStep {
+  text-decoration: underline;
+  transition: color 0.5s ease-in-out;
+  color: var(--pink) !important;
+}
+
+.selectedIcon {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.unselectedIcon {
+  opacity: 0.0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.icons {
+  position: relative;
+  height: 64px;
+}
+
+.iconImage {
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.stepDescription {
+  max-width: 40%;
+  position: relative;
+}
+
+@media screen and (max-width: 768px) {
+  .stepDescription {
+    max-width: 100%;
+  }
+}
+
+.showStepDescription {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.hideStepDescription {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+#stepDescriptionContainer {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.centeredContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.fadingOpacity {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.question, .answer {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  background: #141519;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.question {
+  z-index: 99;
+}
+
+.answer {
+  z-index: 5;
+  overflow-x: hidden !important;
+  overflow: hidden;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.answerButtons {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
