@@ -29,6 +29,13 @@ export type CardParameters = {
     understanding: UnderstandingLevel[]
 }
 
+export function getParameters(parameters: CardParameters): { modules: string[], understanding: string[] } {
+    return {
+        modules: parameters.modules,
+        understanding: parameters.understanding.map((e) => ["RED", "YELLOW", "GREEN"][e]),
+    }
+}
+
 export type UserData = {
     firstName?: string,
     token?: String,

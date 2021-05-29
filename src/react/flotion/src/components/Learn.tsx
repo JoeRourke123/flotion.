@@ -10,7 +10,7 @@ import {
     EuiLoadingSpinner, EuiPopover, EuiText
 } from "@elastic/eui";
 import {getHeaders} from "../utils/auth";
-import {getUnderstanding, UnderstandingLevel} from "../utils";
+import {getParameters, getUnderstanding, UnderstandingLevel} from "../utils";
 import "../App.css";
 import {isMobile} from "react-device-detect";
 import CanvasDraw from "react-canvas-draw";
@@ -30,7 +30,7 @@ const Learn: FC = () => {
 
     const {data, loading, refetch, networkStatus} = useQuery(RANDOM_CARD_QUERY, {
         ...getHeaders(token),
-        variables: parameters,
+        variables: getParameters(parameters),
         notifyOnNetworkStatusChange: true
     });
     const [markAsCorrect] = useMutation(CORRECT_MUTATION);
