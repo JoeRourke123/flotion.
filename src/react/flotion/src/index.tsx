@@ -23,7 +23,9 @@ const httpLink = createHttpLink({
 const client = new ApolloClient({
     typeDefs: [UNDERSTANDING_ENUM],
     link: httpLink,
-    cache: new InMemoryCache()
+    cache: new InMemoryCache({
+        resultCaching: false,
+    })
 });
 
 ReactDOM.render(

@@ -31,7 +31,7 @@ const Learn: FC = () => {
     const {data, loading, refetch, networkStatus} = useQuery(RANDOM_CARD_QUERY, {
         ...getHeaders(token),
         variables: getParameters(parameters),
-        notifyOnNetworkStatusChange: true
+        notifyOnNetworkStatusChange: true,
     });
     const [markAsCorrect] = useMutation(CORRECT_MUTATION);
 
