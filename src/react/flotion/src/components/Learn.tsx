@@ -1,27 +1,34 @@
 import React, {FC, useEffect, useState} from "react";
-import {useAppSelector} from "../utils/hooks";
+import {useAppDispatch, useAppSelector} from "../utils/hooks";
 import {useHistory} from "react-router";
 import {NetworkStatus, useLazyQuery, useMutation, useQuery} from "@apollo/client";
 import {CORRECT_MUTATION, RANDOM_CARD_QUERY} from "../utils/gql";
 import {Flashcard} from "../utils/flashcard";
 import NoCards from "./NoCards";
-import {EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText} from "@elastic/eui";
+import {
+    EuiButton, EuiButtonIcon, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiIcon,
+    EuiLoadingSpinner, EuiPopover, EuiText
+} from "@elastic/eui";
 import {getHeaders} from "../utils/auth";
 import {getUnderstanding, UnderstandingLevel} from "../utils";
 import "../App.css";
 import {isMobile} from "react-device-detect";
 import CanvasDraw from "react-canvas-draw";
+import {logoutUser} from "../store";
 
 const Learn: FC = () => {
     const token = useAppSelector((state) => state.userData.token);
     const parameters = useAppSelector((state) => state.parameters);
+    const dispatch = useAppDispatch();
 
     const [card, setCard] = useState<Flashcard>();
+
+    const [isPopoverOpen, setPopoverOpen] = useState(false);
 
     const [showDrawing, setShowDrawing] = useState(false);
     const [showQuestion, setShowQuestion] = useState(true);
 
-    const {data, error, loading, refetch, networkStatus} = useQuery(RANDOM_CARD_QUERY, {
+    const {data, loading, refetch, networkStatus} = useQuery(RANDOM_CARD_QUERY, {
         ...getHeaders(token),
         variables: parameters,
         notifyOnNetworkStatusChange: true
@@ -134,8 +141,50 @@ const Learn: FC = () => {
         }
     }, [data]);
 
+    const panels = [
+        {
+            id: 0,
+            items: [
+                {
+                    name: 'Change Parameters',
+                    icon: 'home',
+                    onClick: () => {
+                        if(history.length > 1) {
+                            history.goBack();
+                        } else {
+                            history.replace("/");
+                        }
+                    }
+                },
+                {
+                    name: 'Settings',
+                    icon: 'gear',
+                    onClick: () => {
+                        history.push("/settings");
+                    }
+                },
+                {
+                    name: 'Statistics',
+                    icon: 'visualizeApp',
+                    onClick: () => {
+                        history.push("/statistics");
+                    }
+                },
+                {
+                    name: 'Sign Out',
+                    icon: <EuiIcon type="exit" size="m" color="danger" />,
+                    onClick: () => {
+                        dispatch(logoutUser(null));
+                        history.go(history.length - 1);
+                        history.replace("/");
+                    }
+                },
+            ],
+        },
+    ];
+
     if (isLoading()) return <div className="centeredContainer"><EuiLoadingSpinner size="xl"/></div>;
-    if (data != null && data.response === 204) {
+    if (data != null && data.randomCard.response === 204) {
         return <NoCards/>
     } else if (card != null) {
         // @ts-ignore
@@ -149,14 +198,21 @@ const Learn: FC = () => {
                     iconType="pencil"
                     aria-label="Draw"
                 />
-                <EuiButtonIcon
-                    color="ghost"
+                <EuiPopover
                     className="moreButton"
-                    onClick={() => { }}
-                    size="m"
-                    iconType="boxesVertical"
-                    aria-label="Draw"
-                />
+                    button={<EuiButtonIcon
+                        color="ghost"
+                        onClick={() => { setPopoverOpen(!isPopoverOpen) }}
+                        size="m"
+                        iconType="boxesVertical"
+                        aria-label="Draw"
+                    />}
+                    isOpen={isPopoverOpen}
+                    closePopover={ () => { setPopoverOpen(false) }}
+                    panelPaddingSize="m"
+                    anchorPosition="leftUp">
+                    <EuiContextMenu initialPanelId={0} panels={panels} />
+                </EuiPopover>
                 <div id="drawing" className="eui-fullHeight drawing">
                     <EuiButtonIcon
                         color="accent"
@@ -186,7 +242,7 @@ const Learn: FC = () => {
                         ref={ c => (setCanvas(c != null ? c : undefined)) }
                     />
                 </div>
-                <div id="question" className="eui-fullHeight question" onClick={() => toggleQuestion() }>
+                <div id="question" className="eui-fullHeight question" onClick={() => isPopoverOpen ? null : toggleQuestion() }>
 
                     <EuiFlexGroup responsive={false} className="eui-fullHeight" direction="column" justifyContent="center"
                                   alignItems="center">
@@ -221,7 +277,7 @@ const Learn: FC = () => {
                         </EuiFlexItem>
                     </EuiFlexGroup>
                 </div>
-                <div id="answer" className="eui-fullHeight answer" onClick={() => toggleQuestion()}>
+                <div id="answer" className="eui-fullHeight answer" onClick={() => isPopoverOpen ? null : toggleQuestion()}>
                     <EuiFlexGroup responsive={false} className="eui-fullHeight" direction="column" justifyContent="center"
                                   alignItems="center">
                         <EuiFlexItem />

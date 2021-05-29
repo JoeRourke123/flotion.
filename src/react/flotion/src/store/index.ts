@@ -37,7 +37,8 @@ const userDataSlice: Slice = createSlice({
                 localStorage.setItem("flotion_token", String(state.token));
             }
         },
-        logoutUser(state: UserData) {
+        logoutUser(state: UserData, payload: PayloadAction<any>) {
+            localStorage.clear();
             state.token = undefined;
             state.firstName = undefined;
             state.limits = undefined;

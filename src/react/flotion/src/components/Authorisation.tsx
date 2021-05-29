@@ -78,7 +78,7 @@ const Authorisation: FC = (props) => {
     }, []);
 
     function setDetails() {
-        routerHistory.push("/learn");
+        routerHistory.push("/");
     }
 
     return isLoading || userInfo == null ? (

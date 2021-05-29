@@ -10,7 +10,7 @@ import Error from "./components/Error";
 import {gql, useLazyQuery} from "@apollo/client";
 import {EuiLoadingSpinner} from "@elastic/eui";
 import UserDetailsResponse from "./utils/responses";
-import {useAppDispatch} from "./utils/hooks";
+import {useAppDispatch, useAppSelector} from "./utils/hooks";
 import {setUserData} from './store';
 import {makeUser} from "./utils";
 
@@ -28,6 +28,8 @@ const USER_DATA_QUERY = gql`
 
 const App: FC = () => {
     const dispatch = useAppDispatch();
+    const userToken = useAppSelector((state) => state.userData.token);
+
     const token = localStorage.getItem("flotion_token");
     const [ isLoggedIn, setLoggedIn ] = useState(false);
     const [ isLoading, setLoading ] = useState(false);
@@ -61,6 +63,10 @@ const App: FC = () => {
             setLoading(false);
         }
     }, [data]);
+
+    useEffect(() => {
+        setLoggedIn(userToken !== undefined);
+    }, [userToken]);
 
     return (
         <div className="App">
