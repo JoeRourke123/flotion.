@@ -11,6 +11,7 @@ import me.flotion.model.Understanding
 import org.jraf.klibnotion.model.database.query.DatabaseQuery
 import org.jraf.klibnotion.model.database.query.filter.DatabaseQueryPredicate
 import org.jraf.klibnotion.model.database.query.filter.DatabaseQueryPropertyFilter
+import org.jraf.klibnotion.model.page.Page
 import org.springframework.stereotype.Component
 import java.util.*
 import kotlin.random.Random
@@ -35,32 +36,39 @@ class FlashcardQuery : Query {
 			)
 			val cardDB = context.user.databaseID
 
-			val moduleFilters = modules.map {
-				DatabaseQueryPropertyFilter.MultiSelect(
-					MODULE_SELECT_KEY,
-					DatabaseQueryPredicate.MultiSelect.Contains(it)
-				)
-			}
+			val moduleFilter = DatabaseQuery().any(
+				*modules.map {
+					DatabaseQueryPropertyFilter.MultiSelect(
+						MODULE_SELECT_KEY,
+						DatabaseQueryPredicate.MultiSelect.Contains(it)
+					)
+				}.toTypedArray()
+			)
 
 			val understandingSet = setOf(*understanding.toTypedArray());
 
-			val pages = client.databases.queryDatabase(
-				cardDB,
-				DatabaseQuery().any(
-					*moduleFilters.toTypedArray()
-				)
-			).results.filter {
+			var query = client.databases.queryDatabase(cardDB, moduleFilter)
+
+			val pages: MutableList<Page> = ArrayList(query.results).toMutableList()
+
+			while (query.nextPagination != null) {
+				query = client.databases.queryDatabase(cardDB, moduleFilter, pagination = query.nextPagination!!)
+
+				pages += query.results
+			}
+
+			val filteredPages = pages.filter {
 				context.user.limits.getUnderstandingLevel(
 					(it.propertyValues.find { p -> p.name == CORRECT_PAGE_KEY }?.value as Long).toInt()
 				) in understandingSet
 			}
 
-			if (pages.isEmpty()) {
+			if (filteredPages.isEmpty()) {
 				return FlashcardResponse(204, ResponseMessages.NO_CARDS_HERE.message)
 			}
 
 			val currentTime = Date().time
-			val selectedPage = pages[Random(currentTime.toInt()).nextInt(pages.size)]
+			val selectedPage = filteredPages[Random(currentTime.toInt()).nextInt(filteredPages.size)]
 
 			FlashcardResponse(card = FlashcardFactory.buildCard(selectedPage, context).cardDetails)
 		} catch (exc: UnauthorisedUserException) {
