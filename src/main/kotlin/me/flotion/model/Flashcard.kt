@@ -2,6 +2,7 @@ package me.flotion.model
 
 import me.flotion.config.CORRECT_PAGE_KEY
 import me.flotion.config.NotionSingleton
+import me.flotion.config.UNDERSTANDING_SELECT_KEY
 import org.jraf.klibnotion.model.page.Page
 import org.jraf.klibnotion.model.property.value.PropertyValueList
 import toFormattedString
@@ -56,5 +57,13 @@ class Flashcard(
 		val client = NotionSingleton.userClient(token)
 
 		client.pages.updatePage(cardID.id, PropertyValueList().number(CORRECT_PAGE_KEY, ++correct))
+
+		val newUnderstanding = user.limits.getUnderstandingLevel(correct)
+
+		if (newUnderstanding != understanding) {
+			client.pages.updatePage(cardID.id, PropertyValueList().selectByName(
+				UNDERSTANDING_SELECT_KEY, newUnderstanding.name.capitalize()
+			))
+		}
 	}
 }
