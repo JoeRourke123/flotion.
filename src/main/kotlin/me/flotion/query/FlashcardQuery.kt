@@ -57,10 +57,14 @@ class FlashcardQuery : Query {
 				pages += query.results
 			}
 
-			val filteredPages = pages.filter {
-				context.user.limits.getUnderstandingLevel(
-					(it.propertyValues.find { p -> p.name == CORRECT_PAGE_KEY }?.value as Long).toInt()
-				) in understandingSet
+			val filteredPages = if(understanding.isEmpty()) {
+				pages
+			} else {
+				pages.filter {
+					context.user.limits.getUnderstandingLevel(
+						(it.propertyValues.find { p -> p.name == CORRECT_PAGE_KEY }?.value as Long).toInt()
+					) in understandingSet
+				}
 			}
 
 			if (filteredPages.isEmpty()) {

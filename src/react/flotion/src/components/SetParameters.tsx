@@ -2,10 +2,12 @@ import React, {FC, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../utils/hooks";
 import {
     EuiButton,
-    EuiButtonIcon,
+    EuiButtonIcon, EuiContextMenu,
     EuiFlexGroup,
     EuiFlexItem,
+    EuiIcon,
     EuiLoadingSpinner,
+    EuiPopover,
     EuiSpacer,
     EuiText
 } from "@elastic/eui";
@@ -13,7 +15,7 @@ import "../App.css";
 import {Logo} from "./Logo";
 import {gql, useQuery} from "@apollo/client";
 import {getHeaders} from "../utils/auth";
-import {setModules, setUnderstandingLevels} from "../store";
+import {logoutUser, setModules, setUnderstandingLevels} from "../store";
 import {isMobile} from "react-device-detect";
 import {UnderstandingLevel} from "../utils";
 import {useHistory} from "react-router";
@@ -31,6 +33,8 @@ const MODULES_FETCH_QUERY = gql`
 
 const SetParameters: FC = () => {
     const [selectionState, setSelectionState] = useState(false);
+
+    const [isPopoverOpen, setPopoverOpen] = useState(false);
 
     const userData = useAppSelector((state) => state.userData);
     const parameters = useAppSelector((state) => state.parameters);
@@ -81,6 +85,37 @@ const SetParameters: FC = () => {
     function goToCard() {
         history.push("/learn");
     }
+
+    const panels = [
+        {
+            id: 0,
+            items: [
+                {
+                    name: 'Settings',
+                    icon: 'gear',
+                    onClick: () => {
+                        history.push("/settings");
+                    }
+                },
+                {
+                    name: 'Statistics',
+                    icon: 'visualizeApp',
+                    onClick: () => {
+                        history.push("/statistics");
+                    }
+                },
+                {
+                    name: 'Sign Out',
+                    icon: <EuiIcon type="exit" size="m" color="danger" />,
+                    onClick: () => {
+                        dispatch(logoutUser(null));
+                        history.go(history.length - 1);
+                        history.replace("/");
+                    }
+                },
+            ],
+        },
+    ];
 
     return (
         <div className="container" style={{
@@ -158,12 +193,20 @@ const SetParameters: FC = () => {
                             </EuiButton>}
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                                iconType="boxesVertical"
-                                display="base"
-                                color="accent"
-                                size="m"
-                            />
+                            <EuiPopover
+                                button={<EuiButtonIcon
+                                    iconType="boxesVertical"
+                                    display="base"
+                                    color="accent"
+                                    size="m"
+                                    onClick={() => { setPopoverOpen(!isPopoverOpen) }}
+                                />}
+                                isOpen={isPopoverOpen}
+                                closePopover={ () => { setPopoverOpen(false) }}
+                                panelPaddingSize="m"
+                                anchorPosition="upCenter">
+                                <EuiContextMenu initialPanelId={0} panels={panels} />
+                            </EuiPopover>
                         </EuiFlexItem>
                     </EuiFlexGroup>
                 </EuiFlexItem>
