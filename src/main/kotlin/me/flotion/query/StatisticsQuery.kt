@@ -29,7 +29,8 @@ class StatisticsQuery : Query {
 		var moduleRed: List<StatData>? = null,
 		var moduleYellow: List<StatData>? = null,
 		var moduleGreen: List<StatData>? = null,
-		var overallRed: Int? = null, var overallYellow: Int? = null, var overallGreen: Int? = null
+		var overallRed: Int? = null, var overallYellow: Int? = null, var overallGreen: Int? = null,
+		var moduleCount: Int? = null
 	)
 
 	/**
@@ -50,7 +51,10 @@ class StatisticsQuery : Query {
 		if (context.user == null) return StatsResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
 
 		val hiddenSet = setOf(*hiddenModules.toTypedArray())
-		val modules = context.user.getAllModules().filter { it !in hiddenSet }
+
+		val allModules = context.user.getAllModules()
+
+		val modules = allModules.filter { it !in hiddenSet }
 
 		val redModuleMapping = HashMap<String, Int>()
 		val yellowModuleMapping = HashMap<String, Int>()
@@ -106,7 +110,8 @@ class StatisticsQuery : Query {
 			overall = StatData(CARD_LABEL, "Overall", overallCardCount),
 			overallRed = totalReds,
 			overallYellow = totalYellows,
-			overallGreen = totalGreens
+			overallGreen = totalGreens,
+			moduleCount = allModules.size
 		)
 	}
 }

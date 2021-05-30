@@ -6,6 +6,8 @@
     "@apollo/client": "^3.3.19",
     "@elastic/datemath": "^5.0.3",
     "@elastic/eui": "^34.1.0",
+    "@nivo/bar": "^0.70.1",
+    "@nivo/core": "^0.70.1",
     "@reduxjs/toolkit": "^1.5.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

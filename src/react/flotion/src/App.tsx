@@ -8,7 +8,6 @@ import Learn from "./components/Learn";
 import Authorisation from "./components/Authorisation";
 import Error from "./components/Error";
 import {gql, useLazyQuery} from "@apollo/client";
-import {EuiLoadingSpinner} from "@elastic/eui";
 import UserDetailsResponse from "./utils/responses";
 import {useAppDispatch, useAppSelector} from "./utils/hooks";
 import {setUserData} from './store';
@@ -80,7 +79,7 @@ const App: FC = () => {
                 <Route path="/learn">
                     <Learn/>
                 </Route>
-                <Route path="/stats">
+                <Route path="/statistics">
                     <Stats/>
                 </Route>
                 <Route path="/auth">
