@@ -45,4 +45,11 @@ class ModulesQuery : Query {
 			401,
 			ResponseMessages.NOT_LOGGED_IN.message
 		) else getModulesAndColours(context.user.getModules(), context)
+
+	@GraphQLDescription("gets all the user's modules - even those which are excluded")
+	suspend fun allModules(context: NotionContext): ModulesResponse =
+		if (context.user == null) ModulesResponse(
+			401,
+			ResponseMessages.NOT_LOGGED_IN.message
+		) else getModulesAndColours(context.user.getAllModules(), context)
 }

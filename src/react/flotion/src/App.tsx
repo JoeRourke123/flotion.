@@ -13,6 +13,8 @@ import UserDetailsResponse from "./utils/responses";
 import {useAppDispatch, useAppSelector} from "./utils/hooks";
 import {setUserData} from './store';
 import {makeUser} from "./utils";
+import Settings from "./components/Settings";
+import Loading from "./components/Loading";
 
 const USER_DATA_QUERY = gql`
     query GetUserDetails {
@@ -52,8 +54,8 @@ const App: FC = () => {
                 firstName: data.userDetails.firstName,
                 token: token,
                 limits: {
-                    yellowLimit: data.userDetails.yellowLimit,
-                    greenLimit: data.userDetails.greenLimit
+                    yellowLimit: data.userDetails.limits.yellowLimit,
+                    greenLimit: data.userDetails.limits.greenLimit
                 }
             };
 
@@ -70,9 +72,7 @@ const App: FC = () => {
 
     return (
         <div className="App">
-            {(isLoading ? <div className="centeredContainer">
-            <EuiLoadingSpinner size="xl" />
-        </div> : <Router>
+            {(isLoading ? <Loading /> : <Router>
             <Switch>
                 <Route exact path="/">
                     { isLoggedIn ? <SetParameters /> : <Home /> }
@@ -88,6 +88,9 @@ const App: FC = () => {
                 </Route>
                 <Route path="/error">
                     <Error/>
+                </Route>
+                <Route path="/settings">
+                    <Settings />
                 </Route>
             </Switch>
         </Router>)}
