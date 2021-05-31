@@ -12,3 +12,4 @@ Go to [flotion.me](https://flotion.me), copy the template to your workspace, and
 ## what's to come.
 * Add new features as they become available in the Notion API (such as automatically creating the Flotion database, new blocks, etc).
 * Add transitions between pages for smoother interface.
+* Write smoke tests so general functionality can be observed.
