@@ -7,7 +7,7 @@ import {Flashcard} from "../utils/flashcard";
 import NoCards from "./NoCards";
 import {
     EuiButton, EuiButtonIcon, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiIcon,
-    EuiLoadingSpinner, EuiPopover, EuiText
+    EuiLoadingSpinner, EuiPopover, EuiSpacer, EuiText
 } from "@elastic/eui";
 import {getHeaders} from "../utils/auth";
 import {getParameters, getUnderstanding, UnderstandingLevel} from "../utils";
@@ -15,6 +15,7 @@ import "../App.css";
 import {isMobile} from "react-device-detect";
 import CanvasDraw from "react-canvas-draw";
 import {logoutUser} from "../store";
+import Loading from "./Loading";
 
 const Learn: FC = () => {
     const token = useAppSelector((state) => state.userData.token);
@@ -57,7 +58,8 @@ const Learn: FC = () => {
             if(!showQuestion) {
                 question.style.display = "initial";
                 question.style.zIndex = "20";
-                answer.style.overflow = "hidden";
+            } else {
+                answer.style.display = "initial";
             }
 
             setTimeout(() => {
@@ -72,8 +74,9 @@ const Learn: FC = () => {
                     question.style.display = "none";
                     //@ts-ignore
                     question.style.zIndex = "0";
+                } else {
                     //@ts-ignore
-                    answer.style.overflowY = "auto";
+                    answer.style.display = "none";
                 }
             }, 500);
         }
@@ -184,13 +187,12 @@ const Learn: FC = () => {
         },
     ];
 
-    if (isLoading()) return <div className="centeredContainer"><EuiLoadingSpinner size="xl"/></div>;
+    if (isLoading()) return <Loading/>;
     if (data != null && data.randomCard.response === 204) {
         return <NoCards/>
     } else if (card != null) {
-        // @ts-ignore
         return (
-            <div style={{height: "100vh", width: "100%"}}>
+            <div style={{ width: "100%", minHeight: "100vh", overflowX: "hidden", }}>
                 <EuiButtonIcon
                     color="ghost"
                     className="drawingButton"
@@ -278,17 +280,19 @@ const Learn: FC = () => {
                         </EuiFlexItem>
                     </EuiFlexGroup>
                 </div>
-                <div id="answer" className="eui-fullHeight answer" onClick={() => isPopoverOpen ? null : toggleQuestion()}>
-                    <EuiFlexGroup responsive={false} className="eui-fullHeight" direction="column" justifyContent="center"
-                                  alignItems="center">
-                        <EuiFlexItem />
-                        <EuiFlexItem grow={false}>
-                            <EuiText>
-                                <div dangerouslySetInnerHTML={{ __html: card.answer }} />
-                            </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem />
-                    </EuiFlexGroup>
+                <div id="answer" style={{ display: "none" }} onClick={() => isPopoverOpen ? null : toggleQuestion()}>
+                    <div className="answerContents">
+                        <EuiFlexGroup style={{ minHeight: "calc(100vh - 40px)" }} responsive={false} direction="column" justifyContent="center"
+                                      alignItems="center">
+                            <EuiFlexItem />
+                            <EuiFlexItem grow={false}>
+                                <EuiText>
+                                    <div dangerouslySetInnerHTML={{ __html: card.answer }} />
+                                </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem />
+                        </EuiFlexGroup>
+                    </div>
                 </div>
                 <div className="answerButtons">
                     <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="center" alignItems="flexEnd">
