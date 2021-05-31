@@ -12,7 +12,7 @@ class FlotionApplication {
 	@Bean
 	fun configurer(): WebFluxConfigurer = object : WebFluxConfigurer {
 		override fun addCorsMappings(registry: CorsRegistry) {
-			registry.addMapping("/*").allowedOrigins("http://localhost:3000", "https://flotion.me")
+			registry.addMapping("/*").allowedOrigins("http://localhost:3000", "https://flotion.space")
 		}
 	}
 }
