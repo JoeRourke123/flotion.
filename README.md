@@ -1,4 +1,4 @@
-![flotion logo](https://raw.githubusercontent.com/JoeRourke123/flotion./main/src/react/flotion/src/static/flotion_white.png)
+<img src="https://raw.githubusercontent.com/JoeRourke123/flotion./main/src/react/flotion/src/static/flotion_white.png" width="250" alt="The flotion logo" />
 Test yourself on flashcards made in Notion.
 
 ## tech.
