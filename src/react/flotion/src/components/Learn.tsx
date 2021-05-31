@@ -32,6 +32,7 @@ const Learn: FC = () => {
         ...getHeaders(token),
         variables: getParameters(parameters),
         notifyOnNetworkStatusChange: true,
+        fetchPolicy: "no-cache"
     });
     const [markAsCorrect] = useMutation(CORRECT_MUTATION);
 

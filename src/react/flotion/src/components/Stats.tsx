@@ -2,7 +2,7 @@ import React, {FC, useEffect, useState} from "react";
 import {Logo} from "./Logo";
 import {EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat, EuiText} from "@elastic/eui";
 import {useAppSelector} from "../utils/hooks";
-import {gql, NetworkStatus, useQuery} from "@apollo/client";
+import {gql, NetworkStatus, useLazyQuery, useQuery} from "@apollo/client";
 import {getHeaders} from "../utils/auth";
 import Loading from "./Loading";
 import {useHistory} from "react-router";
@@ -83,13 +83,20 @@ const Stats: FC = () => {
 
     const [hiddenModules, setHiddenModules] = useState<string[]>([]);
 
-    const { data: statData, loading, refetch, networkStatus } = useQuery(STATISTICS_QUERY, {
+    const [fetchStats, { data: statData, loading, networkStatus }] = useLazyQuery(STATISTICS_QUERY, {
         ...getHeaders(token),
         variables: {
-            hiddenModules: Array.from(hiddenModules.values())
+            hiddenModules: hiddenModules
         },
-        notifyOnNetworkStatusChange: true
+        notifyOnNetworkStatusChange: true,
     });
+
+    useEffect(() => { fetchStats({
+        ...getHeaders(token),
+        variables: {
+            hiddenModules: hiddenModules
+        },
+    })}, []);
 
     const { data: moduleData, loading: moduleLoading } = useQuery(GET_ALL_MODULES_QUERY, {
         ...getHeaders(token),
@@ -186,9 +193,12 @@ const Stats: FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                     <EuiButtonIcon display="base" size="m" color="success" iconType="refresh" onClick={ () => {
-                        refetch({
-                            hiddenModules: hiddenModules
-                        });
+                        fetchStats({
+                            ...getHeaders(token),
+                            variables: {
+                                hiddenModules: hiddenModules
+                            },
+                        })
                     }} />
                 </EuiFlexItem>
             </EuiFlexGroup>
