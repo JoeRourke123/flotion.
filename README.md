@@ -1,4 +1,4 @@
-# flotion.
+![flotion logo](https://raw.githubusercontent.com/JoeRourke123/flotion./main/src/react/flotion/src/static/flotion_white.png)
 Test yourself on flashcards made in Notion.
 
 ## tech.
