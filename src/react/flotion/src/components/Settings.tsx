@@ -42,7 +42,7 @@ const SET_MODULES_MUTATION = gql`
     }
 `;
 
-const GET_ALL_MODULES_QUERY = gql`    
+export const GET_ALL_MODULES_QUERY = gql`    
     query AllModules {
         allModules {
             response

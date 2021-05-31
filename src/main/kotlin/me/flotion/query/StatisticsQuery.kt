@@ -52,9 +52,7 @@ class StatisticsQuery : Query {
 
 		val hiddenSet = setOf(*hiddenModules.toTypedArray())
 
-		val allModules = context.user.getAllModules()
-
-		val modules = allModules.filter { it !in hiddenSet }
+		val modules = context.user.getAllModules().filter { it !in hiddenSet }
 
 		val redModuleMapping = HashMap<String, Int>()
 		val yellowModuleMapping = HashMap<String, Int>()
@@ -111,7 +109,7 @@ class StatisticsQuery : Query {
 			overallRed = totalReds,
 			overallYellow = totalYellows,
 			overallGreen = totalGreens,
-			moduleCount = allModules.size
+			moduleCount = modules.size
 		)
 	}
 }

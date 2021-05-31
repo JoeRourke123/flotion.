@@ -1,12 +1,56 @@
 import React, {FC, useEffect, useState} from "react";
 import {Logo} from "./Logo";
-import {EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat, EuiText} from "@elastic/eui";
+import {EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat, EuiText} from "@elastic/eui";
 import {useAppSelector} from "../utils/hooks";
-import {gql, useQuery} from "@apollo/client";
+import {gql, NetworkStatus, useQuery} from "@apollo/client";
 import {getHeaders} from "../utils/auth";
 import Loading from "./Loading";
 import {useHistory} from "react-router";
 import {ResponsiveBar} from "@nivo/bar";
+import {useTheme} from "@nivo/core";
+import {GET_ALL_MODULES_QUERY} from "./Settings";
+import {EuiComboBoxOptionOption} from "@elastic/eui/src/components/combo_box/types";
+
+// @ts-ignore
+const BottomTick = ({ x, y, value }) => {
+    const theme = useTheme();
+
+    return (
+        <g transform={`translate(${x},${y})`}>
+            <text
+                textAnchor="middle"
+                dominantBaseline="middle"
+                style={{
+                    ...theme.axis.ticks.text,
+                    fill: '#DDD',
+                    fontSize: 10,
+                }}
+            >
+                {value}
+            </text>
+        </g>
+    )
+}
+// @ts-ignore
+const LeftTick = ({ x, y, value }) => {
+    const theme = useTheme();
+
+    return (
+        <g transform={`translate(${x - 30},${y})`}>
+            <text
+                textAnchor="middle"
+                dominantBaseline="middle"
+                style={{
+                    ...theme.axis.ticks.text,
+                    fill: '#DDD',
+                    fontSize: 10,
+                }}
+            >
+                {value}
+            </text>
+        </g>
+    )
+};
 
 const STATISTICS_QUERY = gql`    
     query Statistics($hiddenModules: [String!]!) {
@@ -37,25 +81,28 @@ const STATISTICS_QUERY = gql`
 const Stats: FC = () => {
     const token = useAppSelector((state) => state.userData.token);
 
-    const [hiddenModules, setHiddenModules] = useState<Set<string>>(new Set());
+    const [hiddenModules, setHiddenModules] = useState<string[]>([]);
 
-    const { data: statData, loading } = useQuery(STATISTICS_QUERY, {
+    const { data: statData, loading, refetch, networkStatus } = useQuery(STATISTICS_QUERY, {
         ...getHeaders(token),
         variables: {
             hiddenModules: Array.from(hiddenModules.values())
-        }
+        },
+        notifyOnNetworkStatusChange: true
+    });
+
+    const { data: moduleData, loading: moduleLoading } = useQuery(GET_ALL_MODULES_QUERY, {
+        ...getHeaders(token),
     });
 
     const history = useHistory();
 
-
-    useEffect(() => {
-        console.log(statData);
-    });
-
-    if(loading) return <Loading/>;
-    if(statData != null && statData.getStats.response !== 200) {
+    if(loading || moduleLoading || networkStatus === NetworkStatus.refetch) return <Loading/>;
+    if((statData != null && statData.getStats.response !== 200)) {
         history.push("/error", statData.getStats);
+        return <div></div>;
+    } else if(moduleData != null && moduleData.allModules.response !== 200) {
+        history.push("/error", moduleData.allModules);
         return <div></div>;
     }
 
@@ -65,6 +112,10 @@ const Stats: FC = () => {
         yellow: number, yellowColor: string,
         green: number, greenColor: string,
     };
+
+    function changeHiddenModules(modules: EuiComboBoxOptionOption[]) {
+        setHiddenModules(modules.map((e) => e.label));
+    }
 
     function getData(): GraphData[] {
         let dataList: GraphData[] = [];
@@ -116,8 +167,36 @@ const Stats: FC = () => {
                     />
                 </EuiFlexItem>
             </EuiFlexGroup>
-
-            <div style={{ height: "90vh" }} className="chartParent">
+            <EuiSpacer size="xxl" />
+            <EuiFlexGroup>
+                <EuiFlexItem>
+                    <EuiComboBox
+                        fullWidth
+                        placeholder="select modules to hide from statistics."
+                        options={ moduleData.allModules.modules.map((e: string) => {
+                            return { label: e }
+                        }) }
+                        selectedOptions={ hiddenModules.map((v) => {
+                            return { label: v }
+                        }) }
+                        onChange={ changeHiddenModules }
+                        isClearable={true}
+                        data-test-subj="hiddenModuleComboBox"
+                    />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                    <EuiButtonIcon display="base" size="m" color="success" iconType="refresh" onClick={ () => {
+                        refetch({
+                            hiddenModules: hiddenModules
+                        });
+                    }} />
+                </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xxl"/>
+            <EuiText>
+                <h3>per-module stats.</h3>
+            </EuiText>
+            <div style={{ height: "90vh", marginTop: "-50px" }} className="chartParent">
                 <ResponsiveBar
                     data={ getData() }
                     keys={[ 'red', 'yellow', 'green' ]}
@@ -134,17 +213,19 @@ const Stats: FC = () => {
                         tickSize: 5,
                         tickPadding: 5,
                         tickRotation: 0,
-                        legend: 'module',
+                        legend: 'cards.',
                         legendPosition: 'middle',
-                        legendOffset: 32
+                        legendOffset: 32,
+                        renderTick: BottomTick
                     }}
                     axisLeft={{
                         tickSize: 5,
                         tickPadding: 5,
                         tickRotation: 0,
-                        legend: 'stats',
+                        legend: 'module.',
                         legendPosition: 'middle',
-                        legendOffset: -40
+                        legendOffset: -40,
+                        renderTick: LeftTick
                     }}
                     labelSkipWidth={12}
                     labelSkipHeight={12}
@@ -175,8 +256,27 @@ const Stats: FC = () => {
                     animate={true}
                     motionStiffness={90}
                     motionDamping={15}
+                    labelTextColor="black"
+                    tooltip={({ id, indexValue, value }) => (
+                        <strong style={{ color: "#000000" }}>
+                            { indexValue }: {
+                            id.toString().substring(0,1).toUpperCase() + id.toString().substring(1)
+                        } ( { value } )
+                        </strong>
+                    )}
                 />
             </div>
+            <EuiButtonIcon
+                color="ghost"
+                size="m"
+                iconType="arrowLeft"
+                onClick={() => history.goBack() }
+                style={{
+                    position: "absolute",
+                    top: "20px",
+                    left: "10px"
+                }}
+            />
         </div>
     );
 };
