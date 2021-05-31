@@ -1,17 +1,14 @@
-# Flotion
-Test yourself on flashcards made in Notion
+# flotion.
+Test yourself on flashcards made in Notion.
 
-## Tech
-* Simple Flask backend utilising the unofficial Python Notion API (will refactor to use real API once available).
-* Uses chota frontend CSS library for stylings.
+## tech.
+* Kotlin backend utilising Spring and Expedia's GraphQL library
+* Connects with OAuth to the Notion API
+* Interface built using React and the eui library.
 
-## How to install
-* Set a FLOTION_TOKEN environment variable to be your Notion token (fetched from DevTools in Notion.so web app).
-* Make a flashcards database page which has a default image cover (of red,yellow,or blue), a "Correct" number parameter, a select "Module" parameter, and a date/time "Answered" parameter.
-* Replace in the flotion.js file, the MODULES const with your possible tags.
-* Replace CARD_PAGE with the URL of your flashcards database
+## try it out.
+Go to [flotion.me](https://flotion.me), copy the template to your workspace, and login with your Notion account to get started!
 
-## To Do
-* Improve performance (limited by the API currently).
-* Create an installation script allowing user to customise their parameters.
-* Create a statistics page to show data on how well I've answered questions etc.
+## what's to come.
+* Add new features as they become available in the Notion API (such as automatically creating the Flotion database, new blocks, etc).
+* Add transitions between pages for smoother interface.
