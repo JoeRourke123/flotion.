@@ -1,10 +1,13 @@
 package me.flotion.model
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import me.flotion.config.*
 import me.flotion.exceptions.UnvalidatedUserException
 import org.jraf.klibnotion.client.NotionClient
 import org.jraf.klibnotion.model.user.Person
 import redis.clients.jedis.Jedis
+import java.util.concurrent.TimeUnit
 
 abstract class NotionUserFactory {
 	companion object {
@@ -16,12 +19,18 @@ abstract class NotionUserFactory {
 
 		private suspend fun setDefaultValues(token: String) {
 			RedisSingleton.getJedisInstance().use { db ->
-				val cardsDatabaseID = NotionSingleton.getUserCardDB(token)
-				db.hset(
-					token,
-					CARD_DB_KEY,
-					cardsDatabaseID ?: throw UnvalidatedUserException(ResponseMessages.CARD_DB_NOT_FOUND.message)
-				)
+				try {
+					val cardsDatabaseID = NotionSingleton.getUserCardDB(token)
+					db.hset(
+						token,
+						CARD_DB_KEY,
+						cardsDatabaseID ?: throw UnvalidatedUserException(ResponseMessages.CARD_DB_NOT_FOUND.message)
+					)
+				} catch (e: Exception) {
+					delay(5000L)
+					setDefaultValues(token)
+					return;
+				}
 
 				db.hset(token, YELLOW_LIM_KEY, YELLOW_LIMIT.toString())
 				db.hset(token, GREEN_LIM_KEY, GREEN_LIMIT.toString())
