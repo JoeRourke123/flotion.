@@ -68,7 +68,7 @@ const Settings: FC = () => {
         [UnderstandingLevel.YELLOW]: 3,
         [UnderstandingLevel.GREEN]: 5,
     };
-    
+
     const initialLimits = useAppSelector((state) => {
         let init = state.userData.limits;
 
