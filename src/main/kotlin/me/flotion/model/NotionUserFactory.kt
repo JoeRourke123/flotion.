@@ -17,7 +17,7 @@ abstract class NotionUserFactory {
 			}
 		}
 
-		private suspend fun setDefaultValues(token: String) {
+		private suspend fun setDefaultValues(token: String, called: Int = 0) {
 			RedisSingleton.getJedisInstance().use { db ->
 				try {
 					val cardsDatabaseID = NotionSingleton.getUserCardDB(token)
@@ -27,9 +27,11 @@ abstract class NotionUserFactory {
 						cardsDatabaseID ?: throw UnvalidatedUserException(ResponseMessages.CARD_DB_NOT_FOUND.message)
 					)
 				} catch (e: Exception) {
-					delay(5000L)
-					setDefaultValues(token)
-					return;
+					if(called < 4) {
+						delay(5000L)
+						setDefaultValues(token, called + 1)
+						return;
+					}
 				}
 
 				db.hset(token, YELLOW_LIM_KEY, YELLOW_LIMIT.toString())
