@@ -18,8 +18,6 @@ import Loading from "./components/Loading";
 const USER_DATA_QUERY = gql`
     query GetUserDetails {
         userDetails {
-            response
-            message
             firstName
             limits {
                 yellowLimit
@@ -55,7 +53,7 @@ const App: FC = () => {
             setLoading(true);
         }
 
-        if(data && token != null) {
+        if(data && data.userDetails != null && token != null) {
             let userResponse: UserDetailsResponse = {
                 firstName: data.userDetails.firstName,
                 token: token,
@@ -78,14 +76,12 @@ const App: FC = () => {
 
     const history = useHistory();
 
-    if(isLoading) return <Loading />;
-    if(error || data.userDetails.response !== 200) {
+    if(error ||  (data !== undefined && data != null && data.userDetails == null)) {
+        setLoggedIn(false);
+        setLoading(false);
         dispatch(logoutUser(null));
-        history.replace("error", {
-            response: 403,
-            message: "um, it appears your token is invalid. try reauthorising?"
-        });
     }
+    if(isLoading) return <Loading />;
 
     return (
         <div className="App">
