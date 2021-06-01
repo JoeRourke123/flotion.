@@ -46,7 +46,7 @@ const Home: FC = (props) => {
     }
 
     function openLink() {
-        window.location.assign(data.generateAuthURL);
+        location.href = data.generateAuthURL;
     }
 
     return (

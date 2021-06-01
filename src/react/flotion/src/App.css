@@ -180,3 +180,7 @@
     height: calc(var(--vh, 1vh) * 100);
     margin: 0 20px;
 }
+
+.contentsHeight {
+    min-height: calc((var(--vh, 1vh) * 100) - 40px);
+}

@@ -240,6 +240,7 @@ const Learn: FC = () => {
                         immediateLoading={true}
                         backgroundColor="#FFFFFF"
                         brushRadius={2}
+                        lazyRadius={0}
                         canvasWidth={ window.innerWidth }
                         canvasHeight={ window.innerHeight }
                         ref={ c => (setCanvas(c != null ? c : undefined)) }
@@ -282,7 +283,7 @@ const Learn: FC = () => {
                 </div>
                 <div id="answer" style={{ display: "none" }} onClick={() => isPopoverOpen ? null : toggleQuestion()}>
                     <div className="answerContents">
-                        <EuiFlexGroup style={{ minHeight: "calc((var(--vh, 1vh) * 100) - 40px);" }} responsive={false} direction="column" justifyContent="center"
+                        <EuiFlexGroup className="contentsHeight" responsive={false} direction="column" justifyContent="center"
                                       alignItems="center">
                             <EuiFlexItem />
                             <EuiFlexItem grow={false}>
