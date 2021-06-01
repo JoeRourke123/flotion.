@@ -149,8 +149,11 @@ const SetParameters: FC = () => {
                         </EuiFlexItem>
                         <EuiFlexItem>
                             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+                                { !selectionState && data.getModules.modules.length === 0 ? <EuiText>
+                                    <h3>it appears you have no modules set up in Notion.</h3>
+                                </EuiText> : <span></span>}
                                 {!selectionState ? data.getModules.modules.map((module: string) =>
-                                    <EuiFlexItem grow={false}>
+                                    <EuiFlexItem grow={false} key={ module }>
                                         <EuiButton
                                             color="secondary"
                                             fill={moduleSet.has(module)}
