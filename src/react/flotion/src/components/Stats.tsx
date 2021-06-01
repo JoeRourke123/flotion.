@@ -181,7 +181,7 @@ const Stats: FC = () => {
                         fullWidth
                         placeholder="select modules to hide from statistics."
                         options={ moduleData.allModules.modules.map((e: string) => {
-                            return { label: e }
+                            return { label: e, key: e }
                         }) }
                         selectedOptions={ hiddenModules.map((v) => {
                             return { label: v }

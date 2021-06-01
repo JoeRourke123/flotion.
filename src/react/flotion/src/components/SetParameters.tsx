@@ -161,6 +161,7 @@ const SetParameters: FC = () => {
                                     </EuiFlexItem>) : understandings.map((u: UnderstandingLevel) =>
                                     <EuiFlexItem grow={false}>
                                         <EuiButton
+                                            key={ ["Red", "Yellow", "Green"][u] }
                                             color="secondary"
                                             fill={understandingSet.has(u)}
                                             onClick={() => toggle(u, understandingSet)}

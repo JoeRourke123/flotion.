@@ -264,7 +264,7 @@ const Learn: FC = () => {
                                             </EuiButton>
                                         </EuiFlexItem>
                                         {
-                                            card.modules.map((e) => <EuiFlexItem grow={false}>
+                                            card.modules.map((e) => <EuiFlexItem key={ e } grow={false}>
                                                 <EuiButton size="s">
                                                     {e}
                                                 </EuiButton>

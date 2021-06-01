@@ -97,6 +97,7 @@ const Settings: FC = () => {
         return allModulesData.allModules.modules.map((e: string) => {
             return {
                 label: e,
+                key: e,
                 checked: excludedSet.has(e) ? 'on' : undefined
             }
         });
