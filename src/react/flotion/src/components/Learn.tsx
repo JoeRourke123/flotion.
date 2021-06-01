@@ -192,7 +192,7 @@ const Learn: FC = () => {
         return <NoCards/>
     } else if (card != null) {
         return (
-            <div style={{ width: "100%", minHeight: "100vh", overflowX: "hidden", }}>
+            <div style={{ width: "100%", minHeight: "calc(var(--vh, 1vh) * 100)", overflowX: "hidden", }}>
                 <EuiButtonIcon
                     color="ghost"
                     className="drawingButton"
@@ -282,7 +282,7 @@ const Learn: FC = () => {
                 </div>
                 <div id="answer" style={{ display: "none" }} onClick={() => isPopoverOpen ? null : toggleQuestion()}>
                     <div className="answerContents">
-                        <EuiFlexGroup style={{ minHeight: "calc(100vh - 40px)" }} responsive={false} direction="column" justifyContent="center"
+                        <EuiFlexGroup style={{ minHeight: "calc((var(--vh, 1vh) * 100) - 40px);" }} responsive={false} direction="column" justifyContent="center"
                                       alignItems="center">
                             <EuiFlexItem />
                             <EuiFlexItem grow={false}>

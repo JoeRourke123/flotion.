@@ -117,10 +117,9 @@ const SetParameters: FC = () => {
         },
     ];
 
+    // @ts-ignore
     return (
-        <div className="container" style={{
-            height: "100vh"
-        }}>
+        <div className="container parameters">
             <EuiFlexGroup responsive={false} direction="column" style={{
                 height: "100%"
             }}>

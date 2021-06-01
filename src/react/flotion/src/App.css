@@ -173,3 +173,7 @@
 .yellow .euiStat__title {
     color: gold !important;
 }
+
+.parameters.container {
+    height: calc(var(--vh, 1vh) * 100);
+}
