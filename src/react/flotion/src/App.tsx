@@ -69,9 +69,11 @@ const App: FC = () => {
         setLoggedIn(userToken !== undefined);
     }, [userToken]);
 
+    if(isLoading) return <Loading />;
+
     return (
         <div className="App">
-            {(isLoading ? <Loading /> : <Router>
+            <Router>
             <Switch>
                 <Route exact path="/">
                     { isLoggedIn ? <SetParameters /> : <Home /> }
@@ -92,7 +94,7 @@ const App: FC = () => {
                     <Settings />
                 </Route>
             </Switch>
-        </Router>)}
+        </Router>
         </div>
     );
 }

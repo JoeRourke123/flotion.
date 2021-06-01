@@ -63,7 +63,17 @@ const GET_EXCLUDED_MODULES = gql`
 `;
 
 const Settings: FC = () => {
-    const initialLimits = useAppSelector((state) => state.userData.limits);
+    const DEFAULTS = {
+        [UnderstandingLevel.RED]: 0,
+        [UnderstandingLevel.YELLOW]: 3,
+        [UnderstandingLevel.GREEN]: 5,
+    };
+    
+    const initialLimits = useAppSelector((state) => {
+        let init = state.userData.limits;
+
+        return init !== undefined ? init : DEFAULTS;
+    });
     const token = useAppSelector((state) => state.userData.token);
 
     const history = useHistory();
@@ -169,12 +179,6 @@ const Settings: FC = () => {
         setYellowLimit(DEFAULTS[UnderstandingLevel.YELLOW]);
         saveLimits();
     }
-
-    const DEFAULTS = {
-        [UnderstandingLevel.RED]: 0,
-        [UnderstandingLevel.YELLOW]: 3,
-        [UnderstandingLevel.GREEN]: 5,
-    };
 
     if (excludedLoading || moduleLoading) return <Loading/>;
     else return <div className="container">
