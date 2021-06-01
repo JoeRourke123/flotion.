@@ -112,6 +112,8 @@
 
 .question {
     z-index: 15;
+    margin: 0 20px;
+    text-align: center;
 }
 
 .drawing {
@@ -176,4 +178,5 @@
 
 .parameters.container {
     height: calc(var(--vh, 1vh) * 100);
+    margin: 0 20px;
 }
