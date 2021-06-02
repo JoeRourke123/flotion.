@@ -2,12 +2,12 @@ import React, {FC, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../utils/hooks";
 import {useHistory} from "react-router";
 import {NetworkStatus, useLazyQuery, useMutation, useQuery} from "@apollo/client";
-import {CORRECT_MUTATION, RANDOM_CARD_QUERY} from "../utils/gql";
-import {Flashcard} from "../utils/flashcard";
+import {CORRECT_MUTATION, RANDOM_CARD_Q_PARAMS, RANDOM_CARD_QUERY} from "../utils/gql";
+import {Flashcard, toggleDrawingWindow, toggleFlashcard} from "../utils/flashcard";
 import NoCards from "./NoCards";
 import {
     EuiButton, EuiButtonIcon, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiIcon,
-    EuiLoadingSpinner, EuiPopover, EuiSpacer, EuiText
+    EuiPopover, EuiText
 } from "@elastic/eui";
 import {getHeaders} from "../utils/auth";
 import {getParameters, getUnderstanding, UnderstandingLevel} from "../utils";
@@ -22,24 +22,16 @@ const Learn: FC = () => {
     const parameters = useAppSelector((state) => state.parameters);
     const dispatch = useAppDispatch();
 
+    const [canvas, setCanvas] = useState<CanvasDraw>();
     const [card, setCard] = useState<Flashcard>();
-
     const [isPopoverOpen, setPopoverOpen] = useState(false);
-
     const [showDrawing, setShowDrawing] = useState(false);
     const [showQuestion, setShowQuestion] = useState(true);
 
-    const {data, loading, refetch, networkStatus} = useQuery(RANDOM_CARD_QUERY, {
-        ...getHeaders(token),
-        variables: getParameters(parameters),
-        notifyOnNetworkStatusChange: true,
-        fetchPolicy: "no-cache"
-    });
+    const {data, loading, refetch, networkStatus, error} = useQuery(RANDOM_CARD_QUERY, RANDOM_CARD_Q_PARAMS(token, parameters));
     const [markAsCorrect] = useMutation(CORRECT_MUTATION);
 
     const history = useHistory();
-
-    const [canvas, setCanvas] = useState<CanvasDraw>();
 
     function getColor(understanding: UnderstandingLevel): "danger" | "warning" | "secondary" {
         // @ts-ignore
@@ -50,45 +42,13 @@ const Learn: FC = () => {
         }[understanding] || "danger";
     }
 
-    function toggleQuestion() {
-        let question = document.getElementById("question");
-        let answer = document.getElementById("answer");
-
-        if(question != null && answer != null) {
-            if(!showQuestion) {
-                question.style.display = "initial";
-                question.style.zIndex = "20";
-            } else {
-                answer.style.display = "initial";
-            }
-
-            setTimeout(() => {
-                //@ts-ignore
-                question.style.opacity = ( showQuestion ? "0" : "1" );
-            }, 50);
-            setTimeout(() => {
-                setShowQuestion(!showQuestion);
-
-                if(showQuestion) {
-                    //@ts-ignore
-                    question.style.display = "none";
-                    //@ts-ignore
-                    question.style.zIndex = "0";
-                } else {
-                    //@ts-ignore
-                    answer.style.display = "none";
-                }
-            }, 500);
-        }
-    }
-
     function isLoading() {
         return loading || networkStatus === NetworkStatus.refetch;
     }
 
     async function newCard() {
         if(!showQuestion) {
-            toggleQuestion();
+            toggleFlashcard(showQuestion, setShowQuestion);
         }
         await refetch();
     }
@@ -101,30 +61,6 @@ const Learn: FC = () => {
         });
     }
 
-    function toggleDrawing() {
-        let drawing = document.getElementById("drawing");
-
-        if(drawing != null) {
-            if(showDrawing) {
-                drawing.style.opacity = "0";
-
-                setTimeout(() => {
-                    //@ts-ignore
-                    drawing.style.zIndex = "-100";
-                }, 500);
-            } else {
-                drawing.style.zIndex = "100";
-
-                setTimeout(() => {
-                    //@ts-ignore
-                    drawing.style.opacity = "1";
-                }, 50);
-            }
-
-            setShowDrawing(!showDrawing);
-        }
-    }
-
     function resetDrawing() {
         if(canvas !== undefined) {
             canvas.clear();
@@ -132,9 +68,14 @@ const Learn: FC = () => {
     }
 
     useEffect(() => {
+        if(error != null) {
+            history.replace("/error", data.randomCard);
+            return;
+        }
+
         if (data !== undefined) {
             if (data.randomCard.response >= 400) {
-                history.push("/error", data.randomCard);
+                history.replace("/error", data.randomCard);
             } else if (data.randomCard.card != null) {
                 let cardData = {...data.randomCard.card};
                 cardData.understanding = getUnderstanding(cardData.understanding);
@@ -143,7 +84,7 @@ const Learn: FC = () => {
                 setCard(flashcard);
             }
         }
-    }, [data]);
+    }, [data, error]);
 
     const panels = [
         {
@@ -196,7 +137,7 @@ const Learn: FC = () => {
                 <EuiButtonIcon
                     color="ghost"
                     className="drawingButton"
-                    onClick={() => { toggleDrawing() }}
+                    onClick={() => { toggleDrawingWindow(showDrawing, setShowDrawing) }}
                     size="m"
                     iconType="pencil"
                     aria-label="Draw"
@@ -220,7 +161,7 @@ const Learn: FC = () => {
                     <EuiButtonIcon
                         color="accent"
                         className="drawingButton"
-                        onClick={() => { toggleDrawing() }}
+                        onClick={() => { toggleDrawingWindow(showDrawing, setShowDrawing) }}
                         size="m"
                         iconType="cross"
                         aria-label="Hide"
@@ -246,7 +187,7 @@ const Learn: FC = () => {
                         ref={ c => (setCanvas(c != null ? c : undefined)) }
                     />
                 </div>
-                <div id="question" className="eui-fullHeight question" onClick={() => isPopoverOpen ? null : toggleQuestion() }>
+                <div id="question" className="eui-fullHeight question" onClick={() => isPopoverOpen ? null : toggleFlashcard(showQuestion, setShowQuestion) }>
 
                     <EuiFlexGroup responsive={false} className="eui-fullHeight" direction="column" justifyContent="center"
                                   alignItems="center">
@@ -281,7 +222,7 @@ const Learn: FC = () => {
                         </EuiFlexItem>
                     </EuiFlexGroup>
                 </div>
-                <div id="answer" style={{ display: "none" }} onClick={() => isPopoverOpen ? null : toggleQuestion()}>
+                <div id="answer" style={{ display: "none" }} onClick={() => isPopoverOpen ? null : toggleFlashcard(showQuestion, setShowQuestion)}>
                     <div className="answerContents">
                         <EuiFlexGroup className="contentsHeight" responsive={false} direction="column" justifyContent="center"
                                       alignItems="center">

@@ -19,17 +19,7 @@ import {logoutUser, setModules, setUnderstandingLevels} from "../store";
 import {isMobile} from "react-device-detect";
 import {UnderstandingLevel} from "../utils";
 import {useHistory} from "react-router";
-
-const MODULES_FETCH_QUERY = gql`
-    query GetModules {
-        getModules {
-            response
-            message
-            modules
-            colours
-        }
-    }
-`;
+import {MODULES_FETCH_QUERY} from "../utils/gql";
 
 const SetParameters: FC = () => {
     const [selectionState, setSelectionState] = useState(false);

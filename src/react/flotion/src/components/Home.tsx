@@ -4,12 +4,7 @@ import "../App.css";
 import {Logo} from "./Logo";
 import FlexStepIcon from "./StepIcon";
 import {gql, useQuery} from "@apollo/client";
-
-const LOGIN_LINK_QUERY = gql`
-{
-    generateAuthURL
-}
-`;
+import {LOGIN_LINK_QUERY} from "../utils/gql";
 
 const Home: FC = (props) => {
     const [step, setStep] = useState(0);

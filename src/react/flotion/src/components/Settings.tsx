@@ -19,48 +19,7 @@ import {getHeaders} from "../utils/auth";
 import {Toast} from "@elastic/eui/src/components/toast/global_toast_list";
 import Loading from "./Loading";
 import {useHistory} from "react-router";
-
-const SET_LEVELS_MUTATION = gql`    
-    mutation SetLevelsMutation($yellow: Int, $green: Int) {
-        alterLimits(yellow: $yellow, green: $green) {
-            response
-            message
-            limits {
-                yellowLimit
-                greenLimit
-            }
-        }
-    }
-`;
-
-const SET_MODULES_MUTATION = gql`    
-    mutation SetModulesMutation($modules: [String!]!) {
-        setModules(modules: $modules) {
-            response
-            message
-        }
-    }
-`;
-
-export const GET_ALL_MODULES_QUERY = gql`    
-    query AllModules {
-        allModules {
-            response
-            message
-            modules
-        }
-    }
-`;
-
-const GET_EXCLUDED_MODULES = gql`    
-    query ExcludedModules {
-        getExcludedModules {
-            response
-            message
-            modules
-        }
-    }
-`;
+import {GET_ALL_MODULES_QUERY, GET_EXCLUDED_MODULES, SET_LEVELS_MUTATION, SET_MODULES_MUTATION} from "../utils/gql";
 
 const Settings: FC = () => {
     const DEFAULTS = {
@@ -84,12 +43,12 @@ const Settings: FC = () => {
 
     const [setLevels] = useMutation(SET_LEVELS_MUTATION);
     const [saveExcludedModules] = useMutation(SET_MODULES_MUTATION);
-    const { data: allModulesData, loading: moduleLoading, } = useQuery(GET_ALL_MODULES_QUERY, { ...getHeaders(token) });
-    const {data: excludedData, loading: excludedLoading } = useQuery(GET_EXCLUDED_MODULES, {
+    const { data: allModulesData, loading: moduleLoading, error: moduleError } = useQuery(GET_ALL_MODULES_QUERY, { ...getHeaders(token) });
+    const {data: excludedData, loading: excludedLoading, error: excludeError } = useQuery(GET_EXCLUDED_MODULES, {
         ...getHeaders(token),
     });
 
-    const [excludedSet, setExcludedModules]: [Set<string>, React.Dispatch<React.SetStateAction<Set<string>>>] = useState<Set<string>>(new Set());
+    const [excludedSet, setExcludedModules] = useState<Set<string>>(new Set());
 
     function getModuleOptions(): EuiSelectableOption[] {
         if(allModulesData == null || excludedData == null) return [];
@@ -180,6 +139,15 @@ const Settings: FC = () => {
         setYellowLimit(DEFAULTS[UnderstandingLevel.YELLOW]);
         saveLimits();
     }
+
+    useEffect(() => {
+        if(excludeError != null) {
+            history.replace("/error", excludedData.getExcludedModules);
+            return;
+        } else if(moduleError != null) {
+            history.replace("/error", allModulesData.allModules);
+        }
+    }, [excludeError, moduleError]);
 
     if (excludedLoading || moduleLoading) return <Loading/>;
     else return <div className="container">
