@@ -5,6 +5,7 @@ import {Logo} from "./Logo";
 import FlexStepIcon from "./StepIcon";
 import {gql, useQuery} from "@apollo/client";
 import {LOGIN_LINK_QUERY} from "../utils/gql";
+import {iOS} from "../utils";
 
 const Home: FC = (props) => {
     const [step, setStep] = useState(0);
@@ -14,7 +15,8 @@ const Home: FC = (props) => {
         <EuiFlexItem id="step0" className="stepDescription" grow={false}>
             <EuiText>to get started with flotion, you need to copy our template (you can find it <EuiTextColor color="accent">
                 <a style={{color: "var(--pink)"}}
-                    href="https://www.notion.so/14c1b95ff6ee4086b9232541e855d818">here!</a>
+                   target="_blank"
+                   href="https://www.notion.so/14c1b95ff6ee4086b9232541e855d818">here!</a>
             </EuiTextColor>) be sure not to remove/change
                 any of the database structure or the app may break.</EuiText>
             <EuiSpacer/>
@@ -24,7 +26,7 @@ const Home: FC = (props) => {
             <EuiText>now you need to authorise your account with flotion. if you're logging in for the first time, be
                 sure to check your newly created 'flotion' page when prompted.</EuiText>
             <EuiSpacer/>
-            <EuiButton isLoading={loading} onClick={() => openLink()} color="secondary" fill>authorise me.</EuiButton>
+            <EuiButton isLoading={loading} target={ iOS() ? '_blank' : '_self'} href={ loading ? '#' : data.generateAuthURL} color="secondary" fill>authorise me.</EuiButton>
         </EuiFlexItem>,
     ];
 
@@ -40,9 +42,6 @@ const Home: FC = (props) => {
         }, 600);
     }
 
-    function openLink() {
-        window.location.href = data.generateAuthURL;
-    }
 
     return (
         <div className="container">
