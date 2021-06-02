@@ -1,5 +1,6 @@
 import {configureStore, createSlice, PayloadAction, Slice} from "@reduxjs/toolkit";
-import {CardParameters, UnderstandingLevel, UserData} from "../utils";
+import {CardParameters, UnderstandingLevel} from "../utils";
+import {UserData} from "../utils/auth";
 
 const initialCardState: CardParameters = {
     modules: [],
