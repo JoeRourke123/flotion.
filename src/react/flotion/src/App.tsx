@@ -11,21 +11,10 @@ import {gql, useLazyQuery} from "@apollo/client";
 import UserDetailsResponse from "./utils/responses";
 import {useAppDispatch, useAppSelector} from "./utils/hooks";
 import {logoutUser, setUserData} from './store';
-import {makeUser} from "./utils";
 import Settings from "./components/Settings";
 import Loading from "./components/Loading";
-
-const USER_DATA_QUERY = gql`
-    query GetUserDetails {
-        userDetails {
-            firstName
-            limits {
-                yellowLimit
-                greenLimit
-            }
-        }
-    }
-`;
+import {makeUser} from "./utils/auth";
+import {USER_DATA_QUERY} from "./utils/gql";
 
 const App: FC = () => {
     // First we get the viewport height and we multiple it by 1% to get a value for a vh unit

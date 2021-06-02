@@ -111,3 +111,16 @@ export const LOGIN_LINK_QUERY = gql`
         generateAuthURL
     }
 `;
+
+
+export const USER_DATA_QUERY = gql`
+    query GetUserDetails {
+        userDetails {
+            firstName
+            limits {
+                yellowLimit
+                greenLimit
+            }
+        }
+    }
+`;
