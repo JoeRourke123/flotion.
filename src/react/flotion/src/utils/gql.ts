@@ -1,5 +1,5 @@
 import {gql} from "@apollo/client";
-import {getHeaders} from "./auth";
+import {useHeaders} from "./auth";
 import {CardParameters, getParameters} from "./index";
 
 export const RANDOM_CARD_QUERY = gql`    
@@ -18,9 +18,9 @@ export const RANDOM_CARD_QUERY = gql`
     }
 `;
 
-export function RANDOM_CARD_Q_PARAMS(token: string, parameters: CardParameters): Record<string, any> {
+export function useRandomCardParams(token: string, parameters: CardParameters): Record<string, any> {
     return {
-        ...getHeaders(token),
+        ...useHeaders(token),
         variables: getParameters(parameters),
         notifyOnNetworkStatusChange: true,
         fetchPolicy: "no-cache"
@@ -116,10 +116,14 @@ export const LOGIN_LINK_QUERY = gql`
 export const USER_DATA_QUERY = gql`
     query GetUserDetails {
         userDetails {
-            firstName
-            limits {
-                yellowLimit
-                greenLimit
+            response
+            message
+            user {
+                firstName
+                limits {
+                    yellowLimit
+                    greenLimit
+                }
             }
         }
     }

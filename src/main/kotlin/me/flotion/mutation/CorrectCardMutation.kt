@@ -9,6 +9,7 @@ import me.flotion.context.NotionContext
 import me.flotion.model.Flashcard
 import me.flotion.model.FlashcardFactory
 import org.jraf.klibnotion.client.NotionClient
+import org.jraf.klibnotion.model.exceptions.NotionClientException
 import org.jraf.klibnotion.model.property.value.PropertyValueList
 import org.springframework.stereotype.Component
 
@@ -28,8 +29,10 @@ class CorrectCardMutation : Mutation {
 				flashcard.incrementCorrect()
 
 				CorrectCardResponse(card = flashcard.cardDetails)
-			} catch (exc: Exception) {
+			} catch (exc: NotionClientException) {
 				CorrectCardResponse(404, ResponseMessages.MISSING_CARD.message)
+			} catch(exc: Exception) {
+				CorrectCardResponse(500, ResponseMessages.SERVER_ERROR.message)
 			}
 		} else CorrectCardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
 	}

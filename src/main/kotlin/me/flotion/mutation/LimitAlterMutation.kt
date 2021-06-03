@@ -17,19 +17,25 @@ class LimitAlterMutation : Mutation {
 
 	@GraphQLDescription("alters the current user's card colour limits")
 	suspend fun alterLimits(yellow: Int?, green: Int?, context: NotionContext): AlterLimitResponse {
-		val token = context.user?.accessToken ?: "bad_token"
+		if(context.user == null) return AlterLimitResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
 
-		val newLimits = UnderstandingLimits(
-			yellow ?: (context.user?.limits?.yellowLimit ?: YELLOW_LIMIT),
-			green ?: (context.user?.limits?.yellowLimit ?: GREEN_LIMIT)
-		)
+		try {
+			val token = context.user.accessToken
 
-		return if (newLimits.isValid()) {
-			newLimits.saveToUser(token)
+			val newLimits = UnderstandingLimits(
+				yellow ?: (context.user.limits.yellowLimit),
+				green ?: (context.user.limits.yellowLimit)
+			)
 
-			AlterLimitResponse(limits = newLimits)
-		} else {
-			AlterLimitResponse(400, ResponseMessages.INVALID_LIMITS.message, context.user?.limits)
+			return if (newLimits.isValid()) {
+				newLimits.saveToUser(token)
+
+				AlterLimitResponse(limits = newLimits)
+			} else {
+				AlterLimitResponse(400, ResponseMessages.INVALID_LIMITS.message, context.user.limits)
+			}
+		} catch(e: Exception) {
+			return AlterLimitResponse(500, ResponseMessages.SERVER_ERROR.message)
 		}
 	}
 }

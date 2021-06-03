@@ -14,9 +14,13 @@ class ExcludedModulesMutations : Mutation {
 	fun setModules(modules: List<String>, context: NotionContext): ModulesQuery.ModulesResponse {
 		if(context.user == null) return ModulesQuery.ModulesResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
 
-		val newModules = ExcludedModules(ArrayList<String>(modules))
-		newModules.saveToDB(context.user.accessToken)
+		return try {
+			val newModules = ExcludedModules(ArrayList<String>(modules))
+			newModules.saveToDB(context.user.accessToken)
 
-		return ModulesQuery.ModulesResponse(modules = newModules)
+			ModulesQuery.ModulesResponse(modules = newModules)
+		} catch(e: Exception) {
+			ModulesQuery.ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
+		}
 	}
 }

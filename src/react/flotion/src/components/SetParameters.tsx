@@ -13,10 +13,9 @@ import {
 } from "@elastic/eui";
 import "../App.css";
 import {Logo} from "./Logo";
-import {gql, useQuery} from "@apollo/client";
-import {getHeaders} from "../utils/auth";
+import {useQuery} from "@apollo/client";
+import {useHeaders} from "../utils/auth";
 import {logoutUser, setModules, setUnderstandingLevels} from "../store";
-import {isMobile} from "react-device-detect";
 import {UnderstandingLevel} from "../utils";
 import {useHistory} from "react-router";
 import {MODULES_FETCH_QUERY} from "../utils/gql";
@@ -34,7 +33,7 @@ const SetParameters: FC = () => {
 
     const dispatch = useAppDispatch();
 
-    const {data, loading} = useQuery(MODULES_FETCH_QUERY, getHeaders(userData.token));
+    const {data, loading} = useQuery(MODULES_FETCH_QUERY, useHeaders(userData.token));
     const understandings = [UnderstandingLevel.RED, UnderstandingLevel.YELLOW, UnderstandingLevel.GREEN];
 
     const history = useHistory();
@@ -91,7 +90,9 @@ const SetParameters: FC = () => {
                     name: 'Statistics',
                     icon: 'visualizeApp',
                     onClick: () => {
-                        history.push("/statistics");
+                        history.push("/statistics", {
+                            date: new Date()
+                        });
                     }
                 },
                 {
@@ -120,8 +121,8 @@ const SetParameters: FC = () => {
                         </EuiFlexItem>
                     </EuiFlexGroup>
                 </EuiFlexItem>
+                <EuiFlexItem />
                 <EuiFlexItem className="fadingOpacity" id="fadeSelections" grow={true}>
-                    <EuiSpacer size="xxl"/>
                     <EuiFlexGroup responsive={false} direction="column" justifyContent="center">
                         <EuiFlexItem>
                             <EuiFlexGroup style={{
@@ -138,10 +139,10 @@ const SetParameters: FC = () => {
                         </EuiFlexItem>
                         <EuiFlexItem>
                             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
-                                { !selectionState && data.getModules.modules.length === 0 ? <EuiText>
+                                { (!selectionState && (data.getModules.modules === null || data.getModules.modules.length === 0)) ? <EuiText>
                                     <h3>it appears you have no modules set up in Notion.</h3>
                                 </EuiText> : <span></span>}
-                                {!selectionState ? data.getModules.modules.map((module: string) =>
+                                {!selectionState && data.getModules.modules != null ? data.getModules.modules.map((module: string) =>
                                     <EuiFlexItem grow={false} key={ module }>
                                         <EuiButton
                                             color="secondary"
@@ -165,6 +166,7 @@ const SetParameters: FC = () => {
                             </EuiFlexGroup>
                         </EuiFlexItem>
                     </EuiFlexGroup>
+                    <EuiSpacer size="xxl"/>
                 </EuiFlexItem>
                 <EuiFlexItem grow={true}/>
                 <EuiFlexItem className="fadingOpacity" id="fadeButtons" grow={false}>
@@ -178,7 +180,7 @@ const SetParameters: FC = () => {
                                 size="m"
                             />
                         </EuiFlexItem> : ''}
-                        <EuiFlexItem grow={isMobile}>
+                        <EuiFlexItem grow={false}>
                             {selectionState ? <EuiButton color="warning" onClick={goToCard}>
                                 Start
                             </EuiButton> : <EuiButton color="warning" onClick={toggleView}>

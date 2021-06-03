@@ -13,11 +13,12 @@ import {
     createHttpLink,
     InMemoryCache
 } from '@apollo/client';
-import { store } from './store';
+import {store} from './store';
 import {UNDERSTANDING_ENUM} from "./utils";
 
 const httpLink = createHttpLink({
-    uri: 'https://api.flotion.space/graphql'
+    // uri: 'https://api.flotion.space/graphql'
+    uri: 'http://localhost:6969/graphql'
 });
 
 const client = new ApolloClient({
@@ -29,12 +30,12 @@ const client = new ApolloClient({
 });
 
 ReactDOM.render(
-  <ApolloProvider client={client}>
-      <Provider store={store}>
-          <App />
-      </Provider>
-  </ApolloProvider>,
-  document.getElementById('root')
+    <ApolloProvider client={client}>
+        <Provider store={store}>
+            <App/>
+        </Provider>
+    </ApolloProvider>,
+    document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function

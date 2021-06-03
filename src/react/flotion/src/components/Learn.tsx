@@ -2,14 +2,14 @@ import React, {FC, useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "../utils/hooks";
 import {useHistory} from "react-router";
 import {NetworkStatus, useLazyQuery, useMutation, useQuery} from "@apollo/client";
-import {CORRECT_MUTATION, RANDOM_CARD_Q_PARAMS, RANDOM_CARD_QUERY} from "../utils/gql";
+import {CORRECT_MUTATION, useRandomCardParams, RANDOM_CARD_QUERY} from "../utils/gql";
 import {Flashcard, toggleDrawingWindow, toggleFlashcard} from "../utils/flashcard";
 import NoCards from "./NoCards";
 import {
     EuiButton, EuiButtonIcon, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiIcon,
     EuiPopover, EuiText
 } from "@elastic/eui";
-import {getHeaders} from "../utils/auth";
+import {useHeaders} from "../utils/auth";
 import {getParameters, getUnderstanding, UnderstandingLevel} from "../utils";
 import "../App.css";
 import {isMobile} from "react-device-detect";
@@ -22,13 +22,15 @@ const Learn: FC = () => {
     const parameters = useAppSelector((state) => state.parameters);
     const dispatch = useAppDispatch();
 
+    const headers = useHeaders(token);
+
     const [canvas, setCanvas] = useState<CanvasDraw>();
     const [card, setCard] = useState<Flashcard>();
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const [showDrawing, setShowDrawing] = useState(false);
     const [showQuestion, setShowQuestion] = useState(true);
 
-    const {data, loading, refetch, networkStatus, error} = useQuery(RANDOM_CARD_QUERY, RANDOM_CARD_Q_PARAMS(token, parameters));
+    const {data, loading, refetch, networkStatus, error} = useQuery(RANDOM_CARD_QUERY, useRandomCardParams(token, parameters));
     const [markAsCorrect] = useMutation(CORRECT_MUTATION);
 
     const history = useHistory();
@@ -57,7 +59,7 @@ const Learn: FC = () => {
         newCard();
         markAsCorrect({
             variables: { card: card?.id },
-            ...getHeaders(token)
+            ...headers
         });
     }
 
@@ -191,7 +193,7 @@ const Learn: FC = () => {
 
                     <EuiFlexGroup responsive={false} className="eui-fullHeight" direction="column" justifyContent="center"
                                   alignItems="center">
-                        <EuiFlexItem/>
+                        <EuiFlexItem grow={true} />
                         <EuiFlexItem grow={false}>
                             <EuiFlexGroup responsive={false} direction="column" justifyContent="center" alignItems="center">
                                 <EuiFlexItem grow={false}>
@@ -216,7 +218,7 @@ const Learn: FC = () => {
                                 </EuiFlexItem>
                             </EuiFlexGroup>
                         </EuiFlexItem>
-                        <EuiFlexItem/>
+                        <EuiFlexItem grow={true} />
                         <EuiFlexItem grow={false}>
                             <span style={{color: "#AAAAAA"}}>click anywhere to show answer.</span>
                         </EuiFlexItem>

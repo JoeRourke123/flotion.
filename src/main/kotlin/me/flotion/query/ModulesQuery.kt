@@ -34,22 +34,34 @@ class ModulesQuery : Query {
 
 	@GraphQLDescription("retrieves the modules a user has chosen to not show in the application")
 	suspend fun getExcludedModules(context: NotionContext): ModulesResponse =
-		if (context.user == null) ModulesResponse(
-			401,
-			ResponseMessages.NOT_LOGGED_IN.message
-		) else getModulesAndColours(context.user.getExcludedModules(), context)
+		try {
+			if (context.user == null) ModulesResponse(
+				401,
+				ResponseMessages.NOT_LOGGED_IN.message
+			) else getModulesAndColours(context.user.getExcludedModules(), context)
+		} catch(e: Exception) {
+			ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
+		}
 
 	@GraphQLDescription("gets all the user's modules - except those which are excluded")
 	suspend fun getModules(context: NotionContext): ModulesResponse =
-		if (context.user == null) ModulesResponse(
-			401,
-			ResponseMessages.NOT_LOGGED_IN.message
-		) else getModulesAndColours(context.user.getModules(), context)
+		try {
+			if (context.user == null) ModulesResponse(
+				401,
+				ResponseMessages.NOT_LOGGED_IN.message
+			) else getModulesAndColours(context.user.getModules(), context)
+		} catch(e: Exception) {
+			ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
+		}
 
 	@GraphQLDescription("gets all the user's modules - even those which are excluded")
 	suspend fun allModules(context: NotionContext): ModulesResponse =
-		if (context.user == null) ModulesResponse(
-			401,
-			ResponseMessages.NOT_LOGGED_IN.message
-		) else getModulesAndColours(context.user.getAllModules(), context)
+		try {
+			if (context.user == null) ModulesResponse(
+				401,
+				ResponseMessages.NOT_LOGGED_IN.message
+			) else getModulesAndColours(context.user.getAllModules(), context)
+		} catch(e: Exception) {
+			 ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
+		}
 }

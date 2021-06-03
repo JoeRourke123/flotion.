@@ -1,9 +1,8 @@
 import React, {FC, useEffect, useState} from "react";
 import {Logo} from "./Logo";
 import {EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat, EuiText} from "@elastic/eui";
-import {useAppSelector} from "../utils/hooks";
 import {NetworkStatus, useLazyQuery, useQuery} from "@apollo/client";
-import {getHeaders} from "../utils/auth";
+import {useHeaders} from "../utils/auth";
 import Loading from "./Loading";
 import {useHistory} from "react-router";
 import {EuiComboBoxOptionOption} from "@elastic/eui/src/components/combo_box/types";
@@ -12,13 +11,15 @@ import BarChart from "./BarChart";
 import {GET_ALL_MODULES_QUERY} from "../utils/gql";
 
 const Stats: FC = () => {
-    const token = useAppSelector((state) => state.userData.token);
-
     const [hiddenModules, setHiddenModules] = useState<string[]>([]);
+    const [hasFetched, setFetch] = useState(false);
+
+    const headers = useHeaders();
+    const history = useHistory();
 
     const getQueryOptions = () => {
         return {
-            ...getHeaders(token),
+            ...headers,
             variables: {
                 hiddenModules: hiddenModules
             },
@@ -26,28 +27,37 @@ const Stats: FC = () => {
         }
     };
 
-    const [fetchStats, { data: statData, loading, networkStatus }] = useLazyQuery(STATISTICS_QUERY, getQueryOptions());
+    const [fetchStats, { data, called, loading, networkStatus }] = useLazyQuery(STATISTICS_QUERY);
 
-    useEffect(() => { fetchStats(getQueryOptions()) }, []);
-
-    const { data: moduleData, loading: moduleLoading } = useQuery(GET_ALL_MODULES_QUERY, {
-        ...getHeaders(token),
+    useEffect(() => {
+        if(!called) {
+            fetchStats(
+                getQueryOptions()
+            );
+        }
     });
 
-    const history = useHistory();
+    const statData = data !== undefined ? data : {
+        getStats: {
+            overall: { amount: 0 },
+            moduleCount: 0,
+            overallRed: 0,
+            overallYellow: 0,
+            overallGreen: 0,
+            moduleRed: [],
+            moduleYellow: [],
+            moduleGreen: [],
+        }
+    };
+
+    const { data: moduleData, loading: moduleLoading } = useQuery(GET_ALL_MODULES_QUERY, headers);
+
 
     function changeHiddenModules(modules: EuiComboBoxOptionOption[]) {
         setHiddenModules(modules.map((e) => e.label));
     }
 
     if(loading || moduleLoading || networkStatus === NetworkStatus.refetch) return <Loading/>;
-    if((statData != null && statData.getStats.response !== 200)) {
-        history.push("/error", statData.getStats);
-        return <div> </div>;
-    } else if(moduleData != null && moduleData.allModules.response !== 200) {
-        history.push("/error", moduleData.allModules);
-        return <div> </div>;
-    }
 
     return (
         <div className="container">
@@ -101,12 +111,7 @@ const Stats: FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                     <EuiButtonIcon display="base" size="m" color="success" iconType="refresh" onClick={ () => {
-                        fetchStats({
-                            ...getHeaders(token),
-                            variables: {
-                                hiddenModules: hiddenModules
-                            },
-                        })
+                        fetchStats(getQueryOptions())
                     }} />
                 </EuiFlexItem>
             </EuiFlexGroup>

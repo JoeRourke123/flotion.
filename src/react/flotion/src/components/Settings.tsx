@@ -15,7 +15,7 @@ import {Logo} from "./Logo";
 import {useAppSelector} from "../utils/hooks";
 import {UnderstandingLevel} from "../utils";
 import {gql, useMutation, useQuery} from "@apollo/client";
-import {getHeaders} from "../utils/auth";
+import {useHeaders} from "../utils/auth";
 import {Toast} from "@elastic/eui/src/components/toast/global_toast_list";
 import Loading from "./Loading";
 import {useHistory} from "react-router";
@@ -36,6 +36,7 @@ const Settings: FC = () => {
     const token = useAppSelector((state) => state.userData.token);
 
     const history = useHistory();
+    const headers = useHeaders();
 
     const [greenLimit, setGreenLimit] = useState(initialLimits[UnderstandingLevel.GREEN]);
     const [yellowLimit, setYellowLimit] = useState(initialLimits[UnderstandingLevel.YELLOW]);
@@ -43,9 +44,9 @@ const Settings: FC = () => {
 
     const [setLevels] = useMutation(SET_LEVELS_MUTATION);
     const [saveExcludedModules] = useMutation(SET_MODULES_MUTATION);
-    const { data: allModulesData, loading: moduleLoading, error: moduleError } = useQuery(GET_ALL_MODULES_QUERY, { ...getHeaders(token) });
+    const { data: allModulesData, loading: moduleLoading, error: moduleError } = useQuery(GET_ALL_MODULES_QUERY, { ...useHeaders(token) });
     const {data: excludedData, loading: excludedLoading, error: excludeError } = useQuery(GET_EXCLUDED_MODULES, {
-        ...getHeaders(token),
+        ...useHeaders(token),
     });
 
     const [excludedSet, setExcludedModules] = useState<Set<string>>(new Set());
@@ -93,7 +94,7 @@ const Settings: FC = () => {
             greenLimit !== initialLimits[UnderstandingLevel.GREEN]) {
             if(validLimits(yellowLimit, greenLimit)) {
                 setLevels({
-                    ...getHeaders(token),
+                    ...headers,
                     variables: {
                         yellow: yellowLimit,
                         green: greenLimit,
@@ -116,7 +117,7 @@ const Settings: FC = () => {
 
     function saveModules() {
         saveExcludedModules({
-            ...getHeaders(token),
+            ...headers,
             variables: {
                 modules: Array.from(excludedSet.values())
             }
@@ -229,6 +230,7 @@ const Settings: FC = () => {
                 left: "10px"
             }}
         />
+        <EuiSpacer size="xxl" />
     </div>
 };
 
