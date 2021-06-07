@@ -130,6 +130,9 @@ class FlotionBuild : CliktCommand() {
 		} else {
 			println("Couldn't set up flotion systemd service (service may not start or persist).")
 		}
+
+		println("---")
+		println("Systemd service set up complete.")
 	}
 
 	/**
@@ -150,6 +153,9 @@ class FlotionBuild : CliktCommand() {
 		} else {
 			println("Couldn't set up flotion Caddy service (reverse proxy/domain name may not be available).")
 		}
+
+		println("---")
+		println("Caddy initialised.")
 	}
 
 	/**
@@ -168,6 +174,9 @@ class FlotionBuild : CliktCommand() {
 		system("cd $flotionDir && rm -r build")
 		system("cd $flotionDir && ./gradlew buildRun")
 		system("systemctl --user restart flotion.service")
+
+		println("---")
+		println("Backend initialised")
 	}
 
 	/**
@@ -183,6 +192,9 @@ class FlotionBuild : CliktCommand() {
 		} else {
 			system("pm2 restart $PM2_REACT_ID")
 		}
+
+		println("----")
+		println("Frontend deployed!")
 	}
 
 	/**
@@ -190,9 +202,28 @@ class FlotionBuild : CliktCommand() {
 	 */
 	private fun buildTools() {
 		val toolsDir = "$envHomeDir/flotion/tools/"
+		val toolsPaths = listOf("$toolsDir/flotion-build/build/bin/native/releaseExecutable")
 
-		system("cd $toolsDir/flotion-build && ./gradlew nativeBinaries")
+		for (tool in listOf("flotion-build")) {
+			system("cd $toolsDir$tool && ./gradlew nativeBinaries")
+		}
 
+		val path = getenv("PATH")!!.toKString()
+		val splitPath = path.split(":")
+
+		val fp = fopen("$envHomeDir/.bashrc", "a")
+
+		for(tool in toolsPaths) {
+			if (!splitPath.contains(tool)) {
+				fprintf(fp, "export PATH=\$PATH:$tool\n")
+			}
+		}
+
+		fclose(fp)
+		system("source $envHomeDir/.bashrc")
+
+		println("----")
+		println("Tools built!")
 	}
 }
 
