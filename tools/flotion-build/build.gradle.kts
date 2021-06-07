@@ -21,7 +21,7 @@ kotlin {
 
     nativeTarget.apply {
         binaries {
-            executable {
+            executable("flotion-build") {
                 entryPoint = "main"
             }
         }
