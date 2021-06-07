@@ -1,3 +1,13 @@
+package utils
+
+import FLOTION_API_PORT
+import FLOTION_API_URL
+import FLOTION_PORT
+import FLOTION_URL
+
+/**
+ * Splices in user data into the systemd configuration.
+ */
 fun buildSystemdConfig(id: String, secret: String, redirect: String, dir: String): String {
 	return """
 [Unit]
@@ -22,6 +32,9 @@ WantedBy=multi-user.target
 """;
 }
 
+/**
+ * Splices constants into the Caddyfile configuration.
+ */
 fun buildCaddyConfig(): String {
 	return """
 $FLOTION_API_URL {

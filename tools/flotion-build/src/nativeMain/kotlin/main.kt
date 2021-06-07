@@ -1,10 +1,11 @@
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.MissingOption
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import kotlinx.cinterop.*
 import platform.posix.*
+import utils.buildCaddyConfig
+import utils.buildSystemdConfig
 import utils.getHomeDirectory
 
 class FlotionBuild : CliktCommand() {
@@ -17,6 +18,9 @@ class FlotionBuild : CliktCommand() {
 		.flag("-nf", "--no-frontend", default = true)
 	val backend by option("-b", "--backend", help = "Don't build the backend")
 		.flag("-nb", "--no-backend", default = true)
+
+	val tools by option("-t", "--tools", help="Rebuild flotion tools")
+		.flag("-nt", "--no-tools", default=false)
 
 	val caddy by option("-c", "--caddy", help = "Restart the caddy instance")
 		.flag("-nc", "--no-caddy", default = false)
@@ -34,6 +38,9 @@ class FlotionBuild : CliktCommand() {
 		envRedirectURI ?: ""
 	)
 
+	/**
+	 * Runs the Clikt command main flow.
+	 */
 	override fun run() {
 		if (checkEnvVars()) {
 			return
@@ -53,6 +60,10 @@ class FlotionBuild : CliktCommand() {
 			runCaddySetup()
 		}
 
+		if(tools) {
+			buildTools()
+		}
+
 		if (backend) {
 			buildBackend()
 		}
@@ -66,6 +77,10 @@ class FlotionBuild : CliktCommand() {
 		}
 	}
 
+	/**
+	 * Checks that all the required fields are given by either options or environment variables.
+	 * returns: true if any of the checks fail.
+	 */
 	private fun checkEnvVars(): Boolean {
 		val hasID = envClientID != null || clientID.isNotEmpty()
 		val hasSecret = envClientSecret != null || clientSecret.isNotEmpty()
@@ -89,11 +104,15 @@ class FlotionBuild : CliktCommand() {
 		return !hasID || !hasSecret || !hasURI
 	}
 
+	/**
+	 * Sets up the systemd service of the project
+	 */
 	private fun runSystemdSetup() {
 		// Set up Systemd service
 		val flotionDir = "$envHomeDir/flotion/"
 		val configDir = "$envHomeDir/.config/systemd/user/"
 
+		// Create the config directory if it doesn't exist
 		if(opendir(configDir) == null) {
 			mkdir(configDir, S_IRWXU)
 		}
@@ -101,17 +120,21 @@ class FlotionBuild : CliktCommand() {
 		val fp = fopen("$configDir/flotion.service", "w")
 
 		if(fp != null) {
+			// Write the systemd unit service configuration to disk.
 			fprintf(fp, buildSystemdConfig(clientID, clientSecret, redirectURI, flotionDir))
 			fclose(fp)
 
+			// Reload and restart the service.
 			system("systemctl --user daemon-reload")
 			system("systemctl --user enable --now flotion.service")
-			system("systemctl --user restart flotion.service")
 		} else {
 			println("Couldn't set up flotion systemd service (service may not start or persist).")
 		}
 	}
 
+	/**
+	 * Runs initial setup of the Caddy configuration.
+	 */
 	private fun runCaddySetup() {
 		// Setup Caddy configuration
 		val caddyConfig = "$envHomeDir$CADDY_FILE_LOC"
@@ -119,6 +142,7 @@ class FlotionBuild : CliktCommand() {
 		val fp = fopen(caddyConfig, "w")
 
 		if(fp != null) {
+			// Write the configuration to the Caddyfile
 			fprintf(fp, buildCaddyConfig())
 			fclose(fp)
 
@@ -128,10 +152,16 @@ class FlotionBuild : CliktCommand() {
 		}
 	}
 
+	/**
+	 * Simply reloads the Caddy instance with the specified config file.
+	 */
 	private fun reloadCaddy(configFile: String) {
 		system("caddy reload --config $configFile")
 	}
 
+	/**
+	 * Runs commands to rebuild the Kotlin Spring backend and restart the systemd service.
+	 */
 	private fun buildBackend() {
 		val flotionDir = "$envHomeDir/flotion/"
 
@@ -140,14 +170,28 @@ class FlotionBuild : CliktCommand() {
 		system("systemctl --user restart flotion.service")
 	}
 
+	/**
+	 * Runs commands to rebuild and restart the React instance.
+	 */
 	private fun buildFrontend() {
 		val frontendDir = "$envHomeDir/flotion/src/react/flotion"
 
 		system("cd $frontendDir && yarn build")
-		system("pm2 restart $PM2_REACT_ID")
+
+		if(initialSetup) {
+			system("cd $frontendDir && pm2 start \"serve -s build\" && pm2 save")
+		} else {
+			system("pm2 restart $PM2_REACT_ID")
+		}
 	}
 
+	/**
+	 * Rebuilds the flotion tools.
+	 */
 	private fun buildTools() {
+		val toolsDir = "$envHomeDir/flotion/tools/"
+
+		system("cd $toolsDir/flotion-build && ./gradlew nativeBinaries")
 
 	}
 }
