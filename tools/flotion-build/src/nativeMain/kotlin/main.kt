@@ -41,6 +41,8 @@ class FlotionBuild : CliktCommand() {
 
 		val flotionDir = "$envHomeDir/flotion/"
 
+		system("cd $flotionDir && git pull")
+
 		if(opendir(flotionDir) == null) {
 			println("Flotion source could not be found at \"$flotionDir\"")
 			return
@@ -52,15 +54,15 @@ class FlotionBuild : CliktCommand() {
 		}
 
 		if (backend) {
-
-		}
-
-		if (caddy) {
-
+			buildBackend()
 		}
 
 		if (frontend) {
+			buildFrontend()
+		}
 
+		if (caddy) {
+			reloadCaddy("$envHomeDir$CADDY_FILE_LOC")
 		}
 	}
 
@@ -112,7 +114,7 @@ class FlotionBuild : CliktCommand() {
 
 	private fun runCaddySetup() {
 		// Setup Caddy configuration
-		val caddyConfig = "$envHomeDir/.config/caddy/flotion"
+		val caddyConfig = "$envHomeDir$CADDY_FILE_LOC"
 
 		val fp = fopen(caddyConfig, "w")
 
@@ -120,10 +122,33 @@ class FlotionBuild : CliktCommand() {
 			fprintf(fp, buildCaddyConfig())
 			fclose(fp)
 
-			system("caddy reload --config $caddyConfig")
+			reloadCaddy(caddyConfig)
 		} else {
 			println("Couldn't set up flotion Caddy service (reverse proxy/domain name may not be available).")
 		}
+	}
+
+	private fun reloadCaddy(configFile: String) {
+		system("caddy reload --config $configFile")
+	}
+
+	private fun buildBackend() {
+		val flotionDir = "$envHomeDir/flotion/"
+
+		system("cd $flotionDir && rm -r build")
+		system("cd $flotionDir && ./gradlew buildRun")
+		system("systemctl --user restart flotion.service")
+	}
+
+	private fun buildFrontend() {
+		val frontendDir = "$envHomeDir/flotion/src/react/flotion"
+
+		system("cd $frontendDir && yarn build")
+		system("pm2 restart $PM2_REACT_ID")
+	}
+
+	private fun buildTools() {
+
 	}
 }
 
