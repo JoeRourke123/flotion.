@@ -77,7 +77,7 @@ class FlotionBuild : CliktCommand() {
 		}
 
 		if (caddy) {
-			reloadCaddy("$envHomeDir$CADDY_FILE_LOC")
+			reloadCaddy("$envHomeDir/.config/caddy/flotion/Caddyfile")
 		}
 	}
 
