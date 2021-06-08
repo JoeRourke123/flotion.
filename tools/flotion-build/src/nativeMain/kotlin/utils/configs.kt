@@ -21,7 +21,7 @@ Type=simple
 Environment="flotion_client_id=$id"
 Environment="flotion_client_secret=$secret"
 Environment="flotion_redirect_uri=$redirect"
-ExecStart=/usr/bin/java -jar $dir/build/libs/flotion-0.0.1-SNAPSHOT.jar
+ExecStart=/usr/bin/java -jar ${dir}build/libs/flotion-0.0.1-SNAPSHOT.jar
 Restart=always
 StandardOutput=syslog
 StandardError=syslog

@@ -5,5 +5,3 @@ const val FLOTION_API_PORT = 6969
 const val FLOTION_PORT = 5000
 
 const val PM2_REACT_ID = 1;
-
-const val CADDY_FILE_LOC = "/.config/caddy/flotion/Caddyfile"

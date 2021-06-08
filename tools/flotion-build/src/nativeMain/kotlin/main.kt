@@ -38,6 +38,8 @@ class FlotionBuild : CliktCommand() {
 		envRedirectURI ?: ""
 	)
 
+	private val n = "> /dev/null"
+
 	/**
 	 * Runs the Clikt command main flow.
 	 */
@@ -48,9 +50,11 @@ class FlotionBuild : CliktCommand() {
 
 		val flotionDir = "$envHomeDir/flotion/"
 
-		system("cd $flotionDir && git pull")
+		system("cd $flotionDir && git pull $n")
+		println("----\n Latest changes pulled. \n")
 
 		if(opendir(flotionDir) == null) {
+			println("\n---- Error")
 			println("Flotion source could not be found at \"$flotionDir\"")
 			return
 		}
@@ -108,13 +112,17 @@ class FlotionBuild : CliktCommand() {
 	 * Sets up the systemd service of the project
 	 */
 	private fun runSystemdSetup() {
+		println("---")
+
 		// Set up Systemd service
 		val flotionDir = "$envHomeDir/flotion/"
 		val configDir = "$envHomeDir/.config/systemd/user/"
 
 		// Create the config directory if it doesn't exist
 		if(opendir(configDir) == null) {
+			mkdir("$envHomeDir/.config/systemd", S_IRWXU)
 			mkdir(configDir, S_IRWXU)
+			println("Making configuration directories...")
 		}
 
 		val fp = fopen("$configDir/flotion.service", "w")
@@ -124,15 +132,16 @@ class FlotionBuild : CliktCommand() {
 			fprintf(fp, buildSystemdConfig(clientID, clientSecret, redirectURI, flotionDir))
 			fclose(fp)
 
+			println("Configuration file written.")
+
 			// Reload and restart the service.
-			system("systemctl --user daemon-reload")
-			system("systemctl --user enable --now flotion.service")
+			system("systemctl --user daemon-reload $n")
+			system("systemctl --user enable --now flotion.service $n")
+
+			println("----\n Systemd service set up complete. \n")
 		} else {
 			println("Couldn't set up flotion systemd service (service may not start or persist).")
 		}
-
-		println("---")
-		println("Systemd service set up complete.")
 	}
 
 	/**
@@ -140,7 +149,15 @@ class FlotionBuild : CliktCommand() {
 	 */
 	private fun runCaddySetup() {
 		// Setup Caddy configuration
-		val caddyConfig = "$envHomeDir$CADDY_FILE_LOC"
+		println("---")
+		val caddyConfigDir = "$envHomeDir/.config/caddy/flotion"
+		val caddyConfig = "$caddyConfigDir/Caddyfile"
+
+		if(opendir(caddyConfigDir) == null) {
+			mkdir("$envHomeDir/.config/caddy")
+			mkdir(caddyConfigDir)
+			println("Caddy configuration directories created...")
+		}
 
 		val fp = fopen(caddyConfig, "w")
 
@@ -149,20 +166,22 @@ class FlotionBuild : CliktCommand() {
 			fprintf(fp, buildCaddyConfig())
 			fclose(fp)
 
+			println("New flotion Caddyfile written.")
+
 			reloadCaddy(caddyConfig)
+
+			println("Caddy initialised. \n")
 		} else {
-			println("Couldn't set up flotion Caddy service (reverse proxy/domain name may not be available).")
+			println("Couldn't set up flotion Caddy service (reverse proxy/domain name may not be available).\n")
 		}
 
-		println("---")
-		println("Caddy initialised.")
 	}
 
 	/**
 	 * Simply reloads the Caddy instance with the specified config file.
 	 */
 	private fun reloadCaddy(configFile: String) {
-		system("caddy reload --config $configFile")
+		system("caddy reload --config $configFile $n")
 	}
 
 	/**
@@ -171,9 +190,11 @@ class FlotionBuild : CliktCommand() {
 	private fun buildBackend() {
 		val flotionDir = "$envHomeDir/flotion/"
 
-		system("cd $flotionDir && rm -r build")
-		system("cd $flotionDir && ./gradlew build")
-		system("systemctl --user restart flotion.service")
+		println("Building backend project... this may take a few minutes.")
+		system("cd $flotionDir && ./gradlew build $n")
+
+		println("Backend build completed. Restarting service.\n")
+		system("systemctl --user restart flotion.service $n")
 
 		println("---")
 		println("Backend initialised")
@@ -185,12 +206,13 @@ class FlotionBuild : CliktCommand() {
 	private fun buildFrontend() {
 		val frontendDir = "$envHomeDir/flotion/src/react/flotion"
 
-		system("cd $frontendDir && yarn build")
+		println("Building React project, stick the kettle on...")
+		system("cd $frontendDir && yarn build $n")
 
 		if(initialSetup) {
-			system("cd $frontendDir && pm2 start \"serve -s build\" && pm2 save")
+			system("cd $frontendDir && pm2 start \"serve -s build\" $n && pm2 save $n")
 		} else {
-			system("pm2 restart $PM2_REACT_ID")
+			system("pm2 restart $PM2_REACT_ID $n")
 		}
 
 		println("----")
@@ -205,7 +227,7 @@ class FlotionBuild : CliktCommand() {
 		val toolsPaths = listOf("$toolsDir/flotion-build/build/bin/native/releaseExecutable")
 
 		for (tool in listOf("flotion-build")) {
-			system("cd $toolsDir$tool && ./gradlew nativeBinaries")
+			system("cd $toolsDir$tool && ./gradlew nativeBinaries $n")
 		}
 
 		val path = getenv("PATH")!!.toKString()
@@ -220,7 +242,7 @@ class FlotionBuild : CliktCommand() {
 		}
 
 		fclose(fp)
-		system("source $envHomeDir/.bashrc")
+		system("source $envHomeDir/.bashrc $n")
 
 		println("----")
 		println("Tools built!")
