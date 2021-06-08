@@ -14,18 +14,18 @@ class FlotionBuild : CliktCommand() {
 	val envRedirectURI: String? = getenv("flotion_redirect_uri")?.toKString()
 	val envHomeDir: String? = getHomeDirectory()
 
-	val frontend by option("-f", "--frontend", help = "Don't build the frontend.")
+	val frontend by option("-f", "--frontend", help = "Flag to decide whether or not to build frontend. Does build by default.")
 		.flag("-nf", "--no-frontend", default = true)
-	val backend by option("-b", "--backend", help = "Don't build the backend")
+	val backend by option("-b", "--backend", help = "Flag to decide whether or not to build backend. Does build by default.")
 		.flag("-nb", "--no-backend", default = true)
 
-	val tools by option("-t", "--tools", help="Rebuild flotion tools")
+	val tools by option("-t", "--tools", help="Rebuild flotion tools. Doesn't build by default.")
 		.flag("-nt", "--no-tools", default=false)
 
-	val caddy by option("-c", "--caddy", help = "Restart the caddy instance")
+	val caddy by option("-c", "--caddy", help = "Restart the caddy instance. Doesn't restart by default.")
 		.flag("-nc", "--no-caddy", default = false)
 
-	val initialSetup by option("-s", "--setup", help = "Run initial setup of Caddy/Systemd/Builds")
+	val initialSetup by option("-s", "--setup", help = "Run initial setup of Caddy/Systemd/Builds. Only runs when specified.")
 		.flag("-ns", "--no-setup", default = false)
 
 	val clientID by option("--id", help = "Set the Notion API client ID environment variable").default(
@@ -112,7 +112,7 @@ class FlotionBuild : CliktCommand() {
 	 * Sets up the systemd service of the project
 	 */
 	private fun runSystemdSetup() {
-		println("---")
+		println("----")
 
 		// Set up Systemd service
 		val flotionDir = "$envHomeDir/flotion/"
@@ -138,7 +138,7 @@ class FlotionBuild : CliktCommand() {
 			system("systemctl --user daemon-reload $n")
 			system("systemctl --user enable --now flotion.service $n")
 
-			println("----\n Systemd service set up complete. \n")
+			println("Systemd service set up complete. \n")
 		} else {
 			println("Couldn't set up flotion systemd service (service may not start or persist).")
 		}
@@ -188,34 +188,35 @@ class FlotionBuild : CliktCommand() {
 	 * Runs commands to rebuild the Kotlin Spring backend and restart the systemd service.
 	 */
 	private fun buildBackend() {
+		println("---")
 		val flotionDir = "$envHomeDir/flotion/"
 
 		println("Building backend project... this may take a few minutes.")
 		system("cd $flotionDir && ./gradlew build $n")
 
 		println("Backend build completed. Restarting service.\n")
+		system("systemctl --user daemon-reload $n")
 		system("systemctl --user restart flotion.service $n")
 
-		println("---")
-		println("Backend initialised")
+		println("Backend initialised \n")
 	}
 
 	/**
 	 * Runs commands to rebuild and restart the React instance.
 	 */
 	private fun buildFrontend() {
+		println("----")
 		val frontendDir = "$envHomeDir/flotion/src/react/flotion"
 
 		println("Building React project, stick the kettle on...")
 		system("cd $frontendDir && yarn build $n")
 
 		if(initialSetup) {
-			system("cd $frontendDir && pm2 start \"serve -s build\" $n && pm2 save $n")
+			system("cd $frontendDir && pm2 start \"serve -s build\" $n 2$n && pm2 save $n 2$n")
 		} else {
 			system("pm2 restart $PM2_REACT_ID $n")
 		}
 
-		println("----")
 		println("Frontend deployed!")
 	}
 
@@ -223,6 +224,8 @@ class FlotionBuild : CliktCommand() {
 	 * Rebuilds the flotion tools.
 	 */
 	private fun buildTools() {
+		println("----")
+		println("Building tool projects")
 		val toolsDir = "$envHomeDir/flotion/tools/"
 		val toolsPaths = listOf("$toolsDir/flotion-build/build/bin/native/releaseExecutable")
 
@@ -244,7 +247,6 @@ class FlotionBuild : CliktCommand() {
 		fclose(fp)
 		system("source $envHomeDir/.bashrc $n")
 
-		println("----")
 		println("Tools built!")
 	}
 }
