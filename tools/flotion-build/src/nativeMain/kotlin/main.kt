@@ -154,8 +154,8 @@ class FlotionBuild : CliktCommand() {
 		val caddyConfig = "$caddyConfigDir/Caddyfile"
 
 		if(opendir(caddyConfigDir) == null) {
-			mkdir("$envHomeDir/.config/caddy")
-			mkdir(caddyConfigDir)
+			mkdir("$envHomeDir/.config/caddy", S_IRWXU)
+			mkdir(caddyConfigDir, S_IRWXU)
 			println("Caddy configuration directories created...")
 		}
 
