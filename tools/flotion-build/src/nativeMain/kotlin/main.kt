@@ -172,7 +172,7 @@ class FlotionBuild : CliktCommand() {
 		val flotionDir = "$envHomeDir/flotion/"
 
 		system("cd $flotionDir && rm -r build")
-		system("cd $flotionDir && ./gradlew buildRun")
+		system("cd $flotionDir && ./gradlew build")
 		system("systemctl --user restart flotion.service")
 
 		println("---")
@@ -227,4 +227,4 @@ class FlotionBuild : CliktCommand() {
 	}
 }
 
-fun main(args: Array<String>) = FlotionBuild().parse(args)
+fun main(args: Array<String>) = FlotionBuild().main(args)
