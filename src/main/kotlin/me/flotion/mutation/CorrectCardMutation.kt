@@ -2,19 +2,16 @@ package me.flotion.mutation
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Mutation
-import me.flotion.config.CORRECT_PAGE_KEY
-import me.flotion.config.NotionSingleton
 import me.flotion.config.ResponseMessages
 import me.flotion.context.NotionContext
 import me.flotion.model.Flashcard
-import me.flotion.model.FlashcardFactory
-import org.jraf.klibnotion.client.NotionClient
+import me.flotion.services.FlashcardService
 import org.jraf.klibnotion.model.exceptions.NotionClientException
-import org.jraf.klibnotion.model.property.value.PropertyValueList
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class CorrectCardMutation : Mutation {
+class CorrectCardMutation @Autowired constructor(private val cardService: FlashcardService) : Mutation {
 	class CorrectCardResponse(
 		val response: Int = 200,
 		val message: String = ResponseMessages.SUCCESS.message,
@@ -25,8 +22,7 @@ class CorrectCardMutation : Mutation {
 	suspend fun gotCorrect(card: String, context: NotionContext): CorrectCardResponse {
 		return if (context.user != null) {
 			try {
-				val flashcard = FlashcardFactory.buildCardWithoutContents(card, context.user)
-				flashcard.incrementCorrect()
+				val flashcard = cardService.incrementCardCorrectCount(card, context.user)
 
 				CorrectCardResponse(card = flashcard.cardDetails)
 			} catch (exc: NotionClientException) {

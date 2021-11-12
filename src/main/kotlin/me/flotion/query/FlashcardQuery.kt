@@ -8,78 +8,50 @@ import me.flotion.exceptions.UnauthorisedUserException
 import me.flotion.model.Flashcard
 import me.flotion.model.FlashcardFactory
 import me.flotion.model.Understanding
+import me.flotion.services.FlashcardService
+import me.flotion.services.ModulesService
 import org.jraf.klibnotion.model.database.query.DatabaseQuery
 import org.jraf.klibnotion.model.database.query.filter.DatabaseQueryPredicate
 import org.jraf.klibnotion.model.database.query.filter.DatabaseQueryPropertyFilter
 import org.jraf.klibnotion.model.page.Page
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.*
 import kotlin.random.Random
 
 @Component
-class FlashcardQuery : Query {
-	class FlashcardResponse(
-		val response: Int = 200,
-		val message: String = ResponseMessages.SUCCESS.message,
-		val card: Flashcard.FlashcardDetails? = null
-	)
+class FlashcardQuery @Autowired constructor(
+    private val modulesService: ModulesService,
+    private val cardService: FlashcardService
+) : Query {
+    class FlashcardResponse(
+        val response: Int = 200,
+        val message: String = ResponseMessages.SUCCESS.message,
+        val card: Flashcard.FlashcardDetails? = null
+    )
 
-	@GraphQLDescription("returns a random flashcard from the user's card database")
-	suspend fun randomCard(
-		modules: List<String> = emptyList(),
-		understanding: List<Understanding> = emptyList(),
-		context: NotionContext
-	): FlashcardResponse {
-		return try {
-			val client = NotionSingleton.userClient(
-				context.user?.accessToken ?: throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message)
-			)
-			val cardDB = context.user.databaseID
+    @GraphQLDescription("returns a random flashcard from the user's card database")
+    suspend fun randomCard(
+        modules: List<String> = emptyList(),
+        understanding: List<Understanding> = emptyList(),
+        context: NotionContext
+    ): FlashcardResponse {
+        return try {
+            if(context.user == null) throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message)
 
-			val moduleFilter = DatabaseQuery().any(
-				*modules.map {
-					DatabaseQueryPropertyFilter.MultiSelect(
-						MODULE_SELECT_KEY,
-						DatabaseQueryPredicate.MultiSelect.Contains(it)
-					)
-				}.toTypedArray()
-			)
+            val moduleFilter = modulesService.buildModuleFilter(modules)
+            val flashcard = cardService.getRandomFlashcard(moduleFilter, understanding, context.user)
 
-			val understandingSet = setOf(*understanding.toTypedArray());
-
-			var query = client.databases.queryDatabase(cardDB, moduleFilter)
-
-			val pages: MutableList<Page> = ArrayList(query.results).toMutableList()
-
-			while (query.nextPagination != null) {
-				query = client.databases.queryDatabase(cardDB, moduleFilter, pagination = query.nextPagination!!)
-
-				pages += query.results
-			}
-
-			val filteredPages = if(understanding.isEmpty()) {
-				pages
-			} else {
-				pages.filter {
-					context.user.limits.getUnderstandingLevel(
-						(it.propertyValues.find { p -> p.name == CORRECT_PAGE_KEY }?.value as Long).toInt()
-					) in understandingSet
-				}
-			}
-
-			if (filteredPages.isEmpty()) {
-				return FlashcardResponse(204, ResponseMessages.NO_CARDS_HERE.message)
-			}
-
-			val currentTime = Date().time
-			val selectedPage = filteredPages[Random(currentTime.toInt()).nextInt(filteredPages.size)]
-
-			FlashcardResponse(card = FlashcardFactory.buildCard(selectedPage, context).cardDetails)
-		} catch (exc: UnauthorisedUserException) {
-			FlashcardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
-		} catch (exc: Exception) {
-			println(exc.message)
-			FlashcardResponse(500, ResponseMessages.SERVER_ERROR.message)
-		}
-	}
+            if(flashcard != null) {
+                FlashcardResponse(card = flashcard.cardDetails)
+            } else {
+                FlashcardResponse(204, ResponseMessages.NO_CARDS_HERE.message)
+            }
+        } catch (exc: UnauthorisedUserException) {
+            FlashcardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
+        } catch (exc: Exception) {
+            println(exc.message)
+            FlashcardResponse(500, ResponseMessages.SERVER_ERROR.message)
+        }
+    }
 }

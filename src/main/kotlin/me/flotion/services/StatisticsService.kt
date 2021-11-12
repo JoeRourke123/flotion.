@@ -7,15 +7,14 @@ import me.flotion.model.NotionUser
 import me.flotion.model.Understanding
 import me.flotion.query.StatisticsQuery
 import org.jraf.klibnotion.model.database.query.DatabaseQuery
-import org.jraf.klibnotion.model.database.query.filter.DatabaseQueryPredicate
-import org.jraf.klibnotion.model.database.query.filter.DatabaseQueryPropertyFilter
 import org.jraf.klibnotion.model.page.Page
 import org.jraf.klibnotion.model.pagination.Pagination
 import org.jraf.klibnotion.model.pagination.ResultPage
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class StatisticsService {
+class StatisticsService @Autowired constructor(private val modulesService: ModulesService) {
     fun getModuleUnderstandingCounts(allCards: List<Page>, user: NotionUser):
             Triple<Map<String, Int>, Map<String, Int>, Map<String, Int>> {
         val redModuleMapping = mutableMapOf<String, Int>()
@@ -38,12 +37,7 @@ class StatisticsService {
 
     suspend fun getFilteredStatsCards(hiddenModules: List<String>, user: NotionUser): List<Page> {
         // Build the filters to exclude from the stats
-        val filters = hiddenModules.map {
-            DatabaseQueryPropertyFilter.MultiSelect(
-                MODULE_SELECT_KEY,
-                DatabaseQueryPredicate.MultiSelect.DoesNotContain(it)
-            )
-        }.toTypedArray()
+        val filters = modulesService.buildModuleFilter(hiddenModules, false)
 
         // Gets all the cards in the user's flashcard database
         var cardQueryResponse = buildCardQuery(user, filters)
@@ -65,12 +59,10 @@ class StatisticsService {
      */
     private suspend fun buildCardQuery(
         user: NotionUser,
-        filters: Array<DatabaseQueryPropertyFilter.MultiSelect>,
+        filters: DatabaseQuery,
         pagination: Pagination? = null
     ): ResultPage<Page> = NotionSingleton.userClient(user.accessToken).databases.queryDatabase(
-        user.databaseID, DatabaseQuery().all(
-            *filters
-        ), pagination = pagination ?: Pagination()
+        user.databaseID, filters, pagination = pagination ?: Pagination()
     )
 
     fun buildResponseObject(
