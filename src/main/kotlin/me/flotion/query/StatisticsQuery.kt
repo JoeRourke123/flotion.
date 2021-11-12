@@ -10,6 +10,7 @@ import me.flotion.context.NotionContext
 import me.flotion.model.FlashcardFactory
 import me.flotion.model.NotionUser
 import me.flotion.model.Understanding
+import me.flotion.responses.ResponseObjects
 import me.flotion.services.StatisticsService
 import org.jraf.klibnotion.model.database.query.DatabaseQuery
 import org.jraf.klibnotion.model.database.query.filter.DatabaseQueryPredicate
@@ -23,22 +24,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class StatisticsQuery @Autowired constructor(private val statsService: StatisticsService) : Query {
-	class StatData(val name: String, val module: String, val amount: Int)
-	class StatsResponse(
-		val response: Int = 200, val message: String = ResponseMessages.SUCCESS.message,
-		var modules: List<String>? = null,
-		var overall: StatData? = null,
-		var moduleRed: List<StatData>? = null,
-		var moduleYellow: List<StatData>? = null,
-		var moduleGreen: List<StatData>? = null,
-		var overallRed: Int? = null, var overallYellow: Int? = null, var overallGreen: Int? = null,
-		var moduleCount: Int? = null
-	)
 
 	@GraphQLDescription("gets statistics on user's flashcards")
-	suspend fun getStats(hiddenModules: List<String>, context: NotionContext): StatsResponse {
+	suspend fun getStats(hiddenModules: List<String>, context: NotionContext): ResponseObjects.StatsResponse {
 		try {
-			if (context.user == null) return StatsResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
+			if (context.user == null) return ResponseObjects.StatsResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
 
 			val hiddenSet = setOf(*hiddenModules.toTypedArray())
 			val modules = context.user.getAllModules().filter { it !in hiddenSet }
@@ -54,7 +44,7 @@ class StatisticsQuery @Autowired constructor(private val statsService: Statistic
 				modules
 			)
 		} catch(e: Exception) {
-			return StatsResponse(500, ResponseMessages.SERVER_ERROR.message)
+			return ResponseObjects.StatsResponse(500, ResponseMessages.SERVER_ERROR.message)
 		}
 	}
 }

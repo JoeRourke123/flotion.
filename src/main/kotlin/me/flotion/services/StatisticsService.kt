@@ -6,6 +6,7 @@ import me.flotion.model.FlashcardFactory
 import me.flotion.model.NotionUser
 import me.flotion.model.Understanding
 import me.flotion.query.StatisticsQuery
+import me.flotion.responses.ResponseObjects
 import org.jraf.klibnotion.model.database.query.DatabaseQuery
 import org.jraf.klibnotion.model.page.Page
 import org.jraf.klibnotion.model.pagination.Pagination
@@ -70,7 +71,7 @@ class StatisticsService @Autowired constructor(private val modulesService: Modul
         yellowModuleMapping: Map<String, Int>,
         greenModuleMapping: Map<String, Int>,
         modules: List<String>
-    ): StatisticsQuery.StatsResponse {
+    ): ResponseObjects.StatsResponse {
         val totalReds = redModuleMapping.values.sum()
         val totalYellows = yellowModuleMapping.values.sum()
         val totalGreens = greenModuleMapping.values.sum()
@@ -79,12 +80,12 @@ class StatisticsService @Autowired constructor(private val modulesService: Modul
         val cardLabel = "No. of cards"
 
         // Build the response data using the included modules and mappings
-        return StatisticsQuery.StatsResponse(
+        return ResponseObjects.StatsResponse(
             modules = modules,
-            moduleRed = modules.map { StatisticsQuery.StatData(cardLabel, it, redModuleMapping[it] ?: 0) },
-            moduleYellow = modules.map { StatisticsQuery.StatData(cardLabel, it, yellowModuleMapping[it] ?: 0) },
-            moduleGreen = modules.map { StatisticsQuery.StatData(cardLabel, it, greenModuleMapping[it] ?: 0) },
-            overall = StatisticsQuery.StatData(cardLabel, "Overall", overallCardCount),
+            moduleRed = modules.map { ResponseObjects.StatData(cardLabel, it, redModuleMapping[it] ?: 0) },
+            moduleYellow = modules.map { ResponseObjects.StatData(cardLabel, it, yellowModuleMapping[it] ?: 0) },
+            moduleGreen = modules.map { ResponseObjects.StatData(cardLabel, it, greenModuleMapping[it] ?: 0) },
+            overall = ResponseObjects.StatData(cardLabel, "Overall", overallCardCount),
             overallRed = totalReds,
             overallYellow = totalYellows,
             overallGreen = totalGreens,

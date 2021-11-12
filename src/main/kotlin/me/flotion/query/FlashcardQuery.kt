@@ -8,6 +8,7 @@ import me.flotion.exceptions.UnauthorisedUserException
 import me.flotion.model.Flashcard
 import me.flotion.model.FlashcardFactory
 import me.flotion.model.Understanding
+import me.flotion.responses.ResponseObjects
 import me.flotion.services.FlashcardService
 import me.flotion.services.ModulesService
 import org.jraf.klibnotion.model.database.query.DatabaseQuery
@@ -24,18 +25,14 @@ class FlashcardQuery @Autowired constructor(
     private val modulesService: ModulesService,
     private val cardService: FlashcardService
 ) : Query {
-    class FlashcardResponse(
-        val response: Int = 200,
-        val message: String = ResponseMessages.SUCCESS.message,
-        val card: Flashcard.FlashcardDetails? = null
-    )
+
 
     @GraphQLDescription("returns a random flashcard from the user's card database")
     suspend fun randomCard(
         modules: List<String> = emptyList(),
         understanding: List<Understanding> = emptyList(),
         context: NotionContext
-    ): FlashcardResponse {
+    ): ResponseObjects.FlashcardResponse {
         return try {
             if(context.user == null) throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message)
 
@@ -43,15 +40,15 @@ class FlashcardQuery @Autowired constructor(
             val flashcard = cardService.getRandomFlashcard(moduleFilter, understanding, context.user)
 
             if(flashcard != null) {
-                FlashcardResponse(card = flashcard.cardDetails)
+                ResponseObjects.FlashcardResponse(card = flashcard.cardDetails)
             } else {
-                FlashcardResponse(204, ResponseMessages.NO_CARDS_HERE.message)
+                ResponseObjects.FlashcardResponse(204, ResponseMessages.NO_CARDS_HERE.message)
             }
         } catch (exc: UnauthorisedUserException) {
-            FlashcardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
+            ResponseObjects.FlashcardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
         } catch (exc: Exception) {
             println(exc.message)
-            FlashcardResponse(500, ResponseMessages.SERVER_ERROR.message)
+            ResponseObjects.FlashcardResponse(500, ResponseMessages.SERVER_ERROR.message)
         }
     }
 }
