@@ -13,34 +13,30 @@ import org.jraf.klibnotion.model.richtext.RichTextList
 
 class FlashcardFactory {
 	companion object {
-		suspend fun buildCard(id: String, context: NotionContext): Flashcard {
+		suspend fun buildCard(id: String, user: NotionUser): Flashcard {
 			val notionID = NotionID(id)
-			val page: Page = notionID.getPage(
-				context.user ?: throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message)
-			)
+			val page: Page = notionID.getPage(user)
 
-			return buildCard(page, context)
+			return buildCard(page, user)
 		}
 
-		suspend fun buildCardWithoutContents(id: String, context: NotionContext): Flashcard {
+		suspend fun buildCardWithoutContents(id: String, user: NotionUser): Flashcard {
 			val notionID = NotionID(id)
-			val page: Page = notionID.getPage(
-				context.user ?: throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message)
-			)
+			val page: Page = notionID.getPage(user)
 
-			return buildCardWithoutContents(page, context)
+			return buildCardWithoutContents(page, user)
 		}
 
-		suspend fun buildCard(page: Page, context: NotionContext) : Flashcard {
+		suspend fun buildCard(page: Page, user: NotionUser) : Flashcard {
 			val notionID = NotionID(page.id)
-			val pageContents: String = notionID.getContents(context.user ?: throw UnauthorisedUserException(ResponseMessages.NOT_LOGGED_IN.message))
+			val pageContents: String = notionID.getContents(user)
 
-			return buildCardWithContents(page, pageContents, context)
+			return buildCardWithContents(page, pageContents, user)
 		}
 
-		fun buildCardWithoutContents(page: Page, context: NotionContext): Flashcard = buildCardWithContents(page, "", context)
+		fun buildCardWithoutContents(page: Page, user: NotionUser): Flashcard = buildCardWithContents(page, "", user)
 
-		private fun buildCardWithContents(page: Page, contents: String, context: NotionContext): Flashcard {
+		private fun buildCardWithContents(page: Page, contents: String, user: NotionUser): Flashcard {
 			val notionID = NotionID(page.id)
 
 			val pageProperty = (page.propertyValues.find { it.name == "Name" }?.value ?: throw MalformedCardException(ResponseMessages.MALFORMED_CARD.message)) as RichTextList
@@ -54,7 +50,7 @@ class FlashcardFactory {
 			return Flashcard(
 				notionID,
 				pageName,
-				context.user!!,
+				user,
 				contents,
 				modules,
 				corrects,

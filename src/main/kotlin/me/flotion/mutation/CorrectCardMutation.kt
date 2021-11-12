@@ -25,7 +25,7 @@ class CorrectCardMutation : Mutation {
 	suspend fun gotCorrect(card: String, context: NotionContext): CorrectCardResponse {
 		return if (context.user != null) {
 			try {
-				val flashcard = FlashcardFactory.buildCardWithoutContents(card, context)
+				val flashcard = FlashcardFactory.buildCardWithoutContents(card, context.user)
 				flashcard.incrementCorrect()
 
 				CorrectCardResponse(card = flashcard.cardDetails)
