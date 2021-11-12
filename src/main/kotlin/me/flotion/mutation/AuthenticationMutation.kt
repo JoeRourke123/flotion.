@@ -20,7 +20,7 @@ import org.springframework.web.context.support.HttpRequestHandlerServlet
 import org.springframework.web.reactive.function.server.ServerRequest
 
 @Component
-class AuthenticationMutation @Autowired constructor(val authService: AuthenticationService) : Mutation {
+class AuthenticationMutation @Autowired constructor(private val authService: AuthenticationService) : Mutation {
 	data class AuthorisationResponse(
 		val response: Int = 200,
 		val user: NotionClientDetails? = null,

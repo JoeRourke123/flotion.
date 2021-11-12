@@ -36,8 +36,6 @@ data class NotionUser constructor(
 	 * Returns all the modules stored in the Notion database (even excluded ones).
 	 */
 	suspend fun getAllModules(): List<String> {
-		val notion = NotionSingleton.userClient(accessToken)
-
 		val modulesProperty = getModuleProperty()
 
 		return modulesProperty?.options?.map { it.name } ?: emptyList()

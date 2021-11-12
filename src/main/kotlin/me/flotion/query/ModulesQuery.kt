@@ -6,6 +6,7 @@ import me.flotion.config.MODULE_SELECT_KEY
 import me.flotion.config.NotionSingleton
 import me.flotion.config.ResponseMessages
 import me.flotion.context.NotionContext
+import me.flotion.model.NotionUser
 import org.jraf.klibnotion.model.property.spec.MultiSelectPropertySpec
 import org.jraf.klibnotion.model.property.spec.SelectPropertySpec
 import org.springframework.stereotype.Component
@@ -32,36 +33,22 @@ class ModulesQuery : Query {
 		return ModulesResponse(modules = modules, colours = colours)
 	}
 
+	private suspend fun buildModulesResponse(context: NotionContext, modulesFetcher: suspend NotionUser.() -> List<String>) = try {
+		if (context.user == null) ModulesResponse(
+			401,
+			ResponseMessages.NOT_LOGGED_IN.message
+		) else getModulesAndColours(modulesFetcher(context.user), context)
+	} catch(e: Exception) {
+		ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
+	}
+
 	@GraphQLDescription("retrieves the modules a user has chosen to not show in the application")
-	suspend fun getExcludedModules(context: NotionContext): ModulesResponse =
-		try {
-			if (context.user == null) ModulesResponse(
-				401,
-				ResponseMessages.NOT_LOGGED_IN.message
-			) else getModulesAndColours(context.user.getExcludedModules(), context)
-		} catch(e: Exception) {
-			ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
-		}
+	suspend fun getExcludedModules(context: NotionContext): ModulesResponse = buildModulesResponse(context, NotionUser::getExcludedModules)
+
 
 	@GraphQLDescription("gets all the user's modules - except those which are excluded")
-	suspend fun getModules(context: NotionContext): ModulesResponse =
-		try {
-			if (context.user == null) ModulesResponse(
-				401,
-				ResponseMessages.NOT_LOGGED_IN.message
-			) else getModulesAndColours(context.user.getModules(), context)
-		} catch(e: Exception) {
-			ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
-		}
+	suspend fun getModules(context: NotionContext): ModulesResponse = buildModulesResponse(context, NotionUser::getModules)
 
 	@GraphQLDescription("gets all the user's modules - even those which are excluded")
-	suspend fun allModules(context: NotionContext): ModulesResponse =
-		try {
-			if (context.user == null) ModulesResponse(
-				401,
-				ResponseMessages.NOT_LOGGED_IN.message
-			) else getModulesAndColours(context.user.getAllModules(), context)
-		} catch(e: Exception) {
-			 ModulesResponse(500, ResponseMessages.SERVER_ERROR.message)
-		}
+	suspend fun allModules(context: NotionContext): ModulesResponse = buildModulesResponse(context, NotionUser::getAllModules)
 }
