@@ -21,10 +21,10 @@ data class UnderstandingLimits constructor(
 	fun isValid(): Boolean = yellowLimit < greenLimit
 
 	@GraphQLIgnore
-	fun saveToUser(token: String) {
+	fun saveToUser(user: NotionUser) {
 		RedisSingleton.getJedisInstance().use { db ->
-			db.hset(token, YELLOW_LIM_KEY, yellowLimit.toString())
-			db.hset(token, GREEN_LIM_KEY, greenLimit.toString())
+			db.hset(user.accessToken, YELLOW_LIM_KEY, yellowLimit.toString())
+			db.hset(user.accessToken, GREEN_LIM_KEY, greenLimit.toString())
 		}
 	}
 
