@@ -1,4 +1,3 @@
 package me.flotion.exceptions
 
-class PersonalWorkspaceOnlyException {
-}
+class PersonalWorkspaceOnlyException : Exception()

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 abstract class NotionUserFactory {
 	companion object {
-		suspend fun userExists(token: String): Boolean {
+		fun userExists(token: String): Boolean {
 			RedisSingleton.getJedisInstance().use { db ->
 				return db.exists(token)
 			}
@@ -58,7 +58,6 @@ abstract class NotionUserFactory {
 
 		suspend fun fromToken(token: String): NotionUser {
 			if (!userExists(token)) {
-//				throw UnvalidatedUserException("Attempted to create user from token before checking workspace users")
 				setDefaultValues(token)
 			}
 

@@ -43,8 +43,6 @@ object NotionSingleton {
 
 		val databases = client.search.searchDatabases().results
 
-		print(databases)
-
 		val cardDatabase = databases.find { it.title.plainText == CARD_DATABASE_TITLE }
 
 		return cardDatabase?.id
