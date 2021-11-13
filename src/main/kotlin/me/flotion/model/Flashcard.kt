@@ -9,61 +9,70 @@ import toFormattedString
 import java.lang.Exception
 
 data class NotionID(val id: String) {
-	/**
-	 * Returns the ID in a URL format for easy access to pages.
-	 */
-	val url: String = "https://notion.so/$id"
+    /**
+     * Returns the ID in a URL format for easy access to pages.
+     */
+    val url: String = "https://notion.so/$id"
 
-	suspend fun getPage(user: NotionUser): Page {
-		val client = NotionSingleton.userClient(user.accessToken)
+    suspend fun getPage(user: NotionUser): Page {
+        val client = NotionSingleton.userClient(user.accessToken)
 
-		return client.pages.getPage(id)
-	}
+        return client.pages.getPage(id)
+    }
 
-	suspend fun getContents(user: NotionUser): String {
-		val client = NotionSingleton.userClient(user.accessToken)
+    suspend fun getContents(user: NotionUser): String {
+        val client = NotionSingleton.userClient(user.accessToken)
 
-		val blocks = client.blocks.getAllBlockListRecursively(id)
+        val blocks = client.blocks.getAllBlockListRecursively(id)
 
-		return blocks.toFormattedString()
-	}
+        return blocks.toFormattedString()
+    }
 }
 
 enum class Understanding {
-	RED, YELLOW, GREEN
+    RED, YELLOW, GREEN
 }
 
 class Flashcard(
-	private val cardID: NotionID,
-	private val question: String,
-	private val user: NotionUser,
-	private val answer: String,
-	private val modules: List<String>,
-	private var correct: Int,
-	page: Page
+    private val cardID: NotionID,
+    private val question: String,
+    private val user: NotionUser,
+    private val answer: String,
+    private val modules: List<String>,
+    private var correct: Int,
+    page: Page
 ) : Page by page {
-	data class FlashcardDetails(val id: String, val question: String, val answer: String, val modules: List<String>, val understanding: Understanding)
+    data class FlashcardDetails(
+        val id: String,
+        val question: String,
+        val answer: String,
+        val modules: List<String>,
+        val understanding: Understanding
+    )
 
-	val cardDetails: FlashcardDetails
-		get() = FlashcardDetails(cardID.id, question, answer, modules, understanding)
+    val cardDetails: FlashcardDetails
+        get() = FlashcardDetails(cardID.id, question, answer, modules, understanding)
 
-	private val understanding: Understanding
-		get() {
-			return user.limits.getUnderstandingLevel(correct)
-		}
+    private val understanding: Understanding
+        get() {
+            return user.limits.getUnderstandingLevel(correct)
+        }
 
-	suspend fun incrementCorrect() {
-		val token = user.accessToken
-		val client = NotionSingleton.userClient(token)
+    suspend fun incrementCorrect() {
+        val token = user.accessToken
+        val client = NotionSingleton.userClient(token)
 
-		client.pages.updatePage(cardID.id, PropertyValueList().number(CORRECT_PAGE_KEY, ++correct))
+        client.pages.updatePage(cardID.id, properties = PropertyValueList().number(CORRECT_PAGE_KEY, ++correct))
 
-		val newUnderstanding = user.limits.getUnderstandingLevel(correct)
+        val newUnderstanding = user.limits.getUnderstandingLevel(correct)
 
-		if (newUnderstanding != understanding) {
-			client.pages.updatePage(cardID.id, PropertyValueList().selectByName(
-				UNDERSTANDING_SELECT_KEY, newUnderstanding.name.capitalize()
-			))
-		}
-	}
+        if (newUnderstanding != understanding) {
+            client.pages.updatePage(
+                cardID.id,
+                properties = PropertyValueList().selectByName(
+                    UNDERSTANDING_SELECT_KEY, newUnderstanding.name.capitalize()
+                )
+            )
+        }
+    }
 }
