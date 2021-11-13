@@ -17,8 +17,8 @@ import {store} from './store';
 import {UNDERSTANDING_ENUM} from "./utils";
 
 const httpLink = createHttpLink({
-    uri: 'https://api.flotion.space/graphql'
-    // uri: 'http://localhost:6969/graphql'
+    // uri: 'https://api.flotion.space/graphql'
+    uri: 'http://localhost:6969/graphql'
 });
 
 const client = new ApolloClient({

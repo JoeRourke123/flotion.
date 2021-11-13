@@ -33,12 +33,25 @@ const SetParameters: FC = () => {
 
     const dispatch = useAppDispatch();
 
-    const {data, loading} = useQuery(MODULES_FETCH_QUERY, useHeaders(userData.token));
+    const {data, loading, refetch} = useQuery(MODULES_FETCH_QUERY, {
+        ...useHeaders(userData.token),
+        fetchPolicy: "network-only",
+        nextFetchPolicy: "network-only"
+    })
+
     const understandings = [UnderstandingLevel.RED, UnderstandingLevel.YELLOW, UnderstandingLevel.GREEN];
 
     const history = useHistory();
 
     if (loading) return <div className="centeredContainer"><EuiLoadingSpinner size="xl"/></div>
+
+    const loadedModulesSet = new Set<string>(data.getModules.modules);
+    moduleSet.forEach((module) => {
+        if (!loadedModulesSet.has(module)) {
+            toggle(module, moduleSet);
+        }
+    })
+
 
     function toggle(item: string | UnderstandingLevel, set: Set<string | UnderstandingLevel>) {
         let copySet = new Set<string | UnderstandingLevel>(set);
@@ -140,7 +153,7 @@ const SetParameters: FC = () => {
                         <EuiFlexItem>
                             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
                                 { (!selectionState && (data.getModules.modules === null || data.getModules.modules.length === 0)) ? <EuiText>
-                                    <h3>it appears you have no modules set up in Notion.</h3>
+                                    <h3>it appears you have no modules set up in Notion. make sure you haven't excluded all your modules in the app settings.</h3>
                                 </EuiText> : <span></span>}
                                 {!selectionState && data.getModules.modules != null ? data.getModules.modules.map((module: string) =>
                                     <EuiFlexItem grow={false} key={ module }>

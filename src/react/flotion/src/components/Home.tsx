@@ -17,8 +17,8 @@ const Home: FC = (props) => {
                 <a style={{color: "var(--pink)"}}
                    target="_blank"
                    href="https://www.notion.so/14c1b95ff6ee4086b9232541e855d818">here!</a>
-            </EuiTextColor>) be sure not to remove/change
-                any of the database structure or the app may break.</EuiText>
+            </EuiTextColor>) be sure not to remove
+                any properties from the database or the app may break.</EuiText>
             <EuiSpacer/>
             <EuiButton onClick={() => progressStep()} color="secondary" fill>i've done this!</EuiButton>
         </EuiFlexItem>,

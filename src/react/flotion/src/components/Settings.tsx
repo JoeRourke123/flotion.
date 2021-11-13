@@ -44,9 +44,15 @@ const Settings: FC = () => {
 
     const [setLevels] = useMutation(SET_LEVELS_MUTATION);
     const [saveExcludedModules] = useMutation(SET_MODULES_MUTATION);
-    const { data: allModulesData, loading: moduleLoading, error: moduleError } = useQuery(GET_ALL_MODULES_QUERY, { ...useHeaders(token) });
+    const { data: allModulesData, loading: moduleLoading, error: moduleError } = useQuery(GET_ALL_MODULES_QUERY, {
+        ...useHeaders(token),
+        fetchPolicy: "network-only",
+        nextFetchPolicy: "network-only"
+    });
     const {data: excludedData, loading: excludedLoading, error: excludeError } = useQuery(GET_EXCLUDED_MODULES, {
         ...useHeaders(token),
+        fetchPolicy: "network-only",
+        nextFetchPolicy: "network-only"
     });
 
     const [excludedSet, setExcludedModules] = useState<Set<string>>(new Set());

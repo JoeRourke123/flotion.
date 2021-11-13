@@ -93,7 +93,7 @@ const Learn: FC = () => {
             id: 0,
             items: [
                 {
-                    name: 'Change Parameters',
+                    name: 'Back to Home',
                     icon: 'home',
                     onClick: () => {
                         if(history.length > 1) {
