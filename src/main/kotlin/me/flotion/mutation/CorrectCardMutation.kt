@@ -2,38 +2,30 @@ package me.flotion.mutation
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Mutation
-import me.flotion.config.CORRECT_PAGE_KEY
-import me.flotion.config.NotionSingleton
 import me.flotion.config.ResponseMessages
 import me.flotion.context.NotionContext
 import me.flotion.model.Flashcard
-import me.flotion.model.FlashcardFactory
-import org.jraf.klibnotion.client.NotionClient
+import me.flotion.responses.ResponseObjects
+import me.flotion.services.FlashcardService
 import org.jraf.klibnotion.model.exceptions.NotionClientException
-import org.jraf.klibnotion.model.property.value.PropertyValueList
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class CorrectCardMutation : Mutation {
-	class CorrectCardResponse(
-		val response: Int = 200,
-		val message: String = ResponseMessages.SUCCESS.message,
-		val card: Flashcard.FlashcardDetails? = null
-	)
+class CorrectCardMutation @Autowired constructor(private val cardService: FlashcardService) : Mutation {
 
 	@GraphQLDescription("marks a specified card as having been answered correctly")
-	suspend fun gotCorrect(card: String, context: NotionContext): CorrectCardResponse {
+	suspend fun gotCorrect(card: String, context: NotionContext): ResponseObjects.CorrectCardResponse {
 		return if (context.user != null) {
 			try {
-				val flashcard = FlashcardFactory.buildCardWithoutContents(card, context)
-				flashcard.incrementCorrect()
+				val flashcard = cardService.incrementCardCorrectCount(card, context.user)
 
-				CorrectCardResponse(card = flashcard.cardDetails)
+				ResponseObjects.CorrectCardResponse(card = flashcard.cardDetails)
 			} catch (exc: NotionClientException) {
-				CorrectCardResponse(404, ResponseMessages.MISSING_CARD.message)
+				ResponseObjects.CorrectCardResponse(404, ResponseMessages.MISSING_CARD.message)
 			} catch(exc: Exception) {
-				CorrectCardResponse(500, ResponseMessages.SERVER_ERROR.message)
+				ResponseObjects.CorrectCardResponse(500, ResponseMessages.SERVER_ERROR.message)
 			}
-		} else CorrectCardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
+		} else ResponseObjects.CorrectCardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
 	}
 }
