@@ -10,6 +10,7 @@ import me.flotion.context.NotionContext
 import me.flotion.exceptions.PersonalWorkspaceOnlyException
 import me.flotion.model.NotionUser
 import me.flotion.model.NotionUserFactory
+import me.flotion.responses.ResponseObjects
 import me.flotion.services.AuthenticationService
 import org.jraf.klibnotion.model.exceptions.NotionClientRequestException
 import org.jraf.klibnotion.model.user.Person
@@ -21,29 +22,24 @@ import org.springframework.web.reactive.function.server.ServerRequest
 
 @Component
 class AuthenticationMutation @Autowired constructor(private val authService: AuthenticationService) : Mutation {
-	data class AuthorisationResponse(
-		val response: Int = 200,
-		val user: NotionClientDetails? = null,
-		val message: String = ResponseMessages.SUCCESS.message
-	)
 
 	@GraphQLDescription("mutation that accepts an oAuth code to get the access_token etc")
-	suspend fun authoriseUser(context: NotionContext, code: String): AuthorisationResponse = try {
-		AuthorisationResponse(
+	suspend fun authoriseUser(context: NotionContext, code: String): ResponseObjects.AuthorisationResponse = try {
+		ResponseObjects.AuthorisationResponse(
 			user = authService.authoriseUser(code).clientDetails
 		)
 	} catch(e: Exception) {
-		AuthorisationResponse(
+		ResponseObjects.AuthorisationResponse(
 			response = 500,
 			message = ResponseMessages.AUTH_ERROR.message
 		)
 	} catch (e: NotionClientRequestException) {
-		AuthorisationResponse(
+		ResponseObjects.AuthorisationResponse(
 			response = 400,
 			message = ResponseMessages.EXPIRED_TOKEN.message
 		)
 	} catch (e: PersonalWorkspaceOnlyException) {
-		AuthorisationResponse(
+		ResponseObjects.AuthorisationResponse(
 			response = 400,
 			message = ResponseMessages.PERSONAL_WORKSPACE_ONLY.message
 		)
