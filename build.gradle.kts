@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "2.4.5"
-	id("io.spring.dependency-management") version "1.0.11.RELEASE"
-	kotlin("jvm") version "1.4.32"
-	kotlin("plugin.spring") version "1.4.32"
+	id("org.springframework.boot") version "2.7.4"
+	id("io.spring.dependency-management") version "1.0.14.RELEASE"
+	kotlin("jvm") version "1.7.20-RC"
+	kotlin("plugin.spring") version "1.7.20-RC"
 }
 
 group = "me.flotion"
@@ -13,17 +13,18 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
 	mavenCentral()
+	maven(url="https://www2.ph.ed.ac.uk/maven2")
 }
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
-	implementation("com.expediagroup", "graphql-kotlin-spring-server", "4.1.1")
+	implementation("com.expediagroup", "graphql-kotlin-spring-server", "6.3.5")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-	implementation("org.jraf:klibnotion:1.9.0")
+	implementation("org.jraf:klibnotion:1.11.0")
 	implementation("redis.clients:jedis:3.6.0")
 	implementation("io.jsonwebtoken:jjwt-api:0.11.2")
 	implementation("io.jsonwebtoken:jjwt-impl:0.11.2")

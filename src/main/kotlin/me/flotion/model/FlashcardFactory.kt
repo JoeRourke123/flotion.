@@ -10,6 +10,7 @@ import org.jraf.klibnotion.model.page.Page
 import org.jraf.klibnotion.model.property.SelectOption
 import org.jraf.klibnotion.model.property.value.MultiSelectPropertyValue
 import org.jraf.klibnotion.model.richtext.RichTextList
+import toFormattedString
 
 class FlashcardFactory {
 	companion object {
@@ -40,9 +41,9 @@ class FlashcardFactory {
 			val notionID = NotionID(page.id)
 
 			val pageProperty = (page.propertyValues.find { it.name == "Name" }?.value ?: throw MalformedCardException(ResponseMessages.MALFORMED_CARD.message)) as RichTextList
-			val pageName = pageProperty.plainText ?: "No name"
+			val pageName = pageProperty.richTextList.toFormattedString() ?: "This card has no name..."
 
-			val corrects: Int = ((page.propertyValues.find { it.name == CORRECT_PAGE_KEY }?.value ?: 0) as Long).toInt()
+			val corrects: Int = ((page.propertyValues.find { it.name == CORRECT_PAGE_KEY }?.value) as Long?)?.toInt() ?: 0
 
 			val moduleProperty = (page.propertyValues.find { it.name == MODULE_SELECT_KEY }?.value ?: throw MalformedCardException(ResponseMessages.MALFORMED_CARD.message)) as ArrayList<SelectOption>
 			val modules = moduleProperty.map { it.name }

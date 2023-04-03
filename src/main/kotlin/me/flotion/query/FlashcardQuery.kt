@@ -47,7 +47,7 @@ class FlashcardQuery @Autowired constructor(
         } catch (exc: UnauthorisedUserException) {
             ResponseObjects.FlashcardResponse(401, ResponseMessages.NOT_LOGGED_IN.message)
         } catch (exc: Exception) {
-            println(exc.message)
+            exc.printStackTrace()
             ResponseObjects.FlashcardResponse(500, ResponseMessages.SERVER_ERROR.message)
         }
     }

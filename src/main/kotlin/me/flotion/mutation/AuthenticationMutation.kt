@@ -29,6 +29,7 @@ class AuthenticationMutation @Autowired constructor(private val authService: Aut
 			user = authService.authoriseUser(code).clientDetails
 		)
 	} catch(e: Exception) {
+		e.printStackTrace()
 		ResponseObjects.AuthorisationResponse(
 			response = 500,
 			message = ResponseMessages.AUTH_ERROR.message

@@ -50,7 +50,7 @@ class FlashcardService {
         } else {
             pages.filter {
                 user.limits.getUnderstandingLevel(
-                    (it.propertyValues.find { p -> p.name == CORRECT_PAGE_KEY }?.value as Long).toInt()
+                    (it.propertyValues.find { p -> p.name == CORRECT_PAGE_KEY }?.value as Long? ?: 0).toInt()
                 ) in understandingSet
             }
         }
