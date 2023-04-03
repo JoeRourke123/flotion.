@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useEffect, useState, ReactDOM} from "react";
 import {useAppDispatch, useAppSelector} from "../utils/hooks";
 import {useHistory} from "react-router";
 import {NetworkStatus, useLazyQuery, useMutation, useQuery} from "@apollo/client";
@@ -9,6 +9,8 @@ import {
     EuiButton, EuiButtonIcon, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiIcon,
     EuiPopover, EuiText
 } from "@elastic/eui";
+// @ts-ignore
+import renderMathInElement from 'katex/dist/contrib/auto-render';
 import {useHeaders} from "../utils/auth";
 import {getParameters, getUnderstanding, UnderstandingLevel} from "../utils";
 import "../App.css";
@@ -16,6 +18,7 @@ import {isMobile} from "react-device-detect";
 import CanvasDraw from "react-canvas-draw";
 import {logoutUser} from "../store";
 import Loading from "./Loading";
+import {MathJax} from "better-react-mathjax";
 
 const Learn: FC = () => {
     const token = useAppSelector((state) => state.userData.token);
@@ -67,6 +70,28 @@ const Learn: FC = () => {
         if(canvas !== undefined) {
             canvas.clear();
         }
+    }
+    const cardQuestion = card && document.getElementById("cardQuestion");
+    if (cardQuestion) {
+        renderMathInElement(cardQuestion, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\[', right: '\\]', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+            ],
+        });
+    }
+    const cardAnswer = card && document.getElementById("cardAnswer");
+    if (cardAnswer) {
+        renderMathInElement(cardAnswer, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\[', right: '\\]', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+            ],
+        });
     }
 
     useEffect(() => {
@@ -134,6 +159,7 @@ const Learn: FC = () => {
     if (data != null && data.randomCard.response === 204) {
         return <NoCards/>
     } else if (card != null) {
+        // @ts-ignore
         return (
             <div style={{ width: "100%", minHeight: "calc(var(--vh, 1vh) * 100)", overflowX: "hidden", }}>
                 <EuiButtonIcon
@@ -196,10 +222,12 @@ const Learn: FC = () => {
                         <EuiFlexItem grow={true} />
                         <EuiFlexItem grow={false}>
                             <EuiFlexGroup responsive={false} direction="column" justifyContent="center" alignItems="center">
-                                <EuiFlexItem grow={false}>
-                                    <EuiText>
-                                        <h1>{card.question}</h1>
-                                    </EuiText>
+                                <EuiFlexItem grow={false} style={{maxWidth: "100%", overflowX: "scroll"}}>
+                                    <div style={{maxWidth: "100%"}}>
+                                        <EuiText style={{maxWidth: "100%", overflowX: "scroll"}}>
+                                            <h1 id="cardQuestion" dangerouslySetInnerHTML={{ __html: card.question }}></h1>
+                                        </EuiText>
+                                    </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem>
                                     <EuiFlexGroup gutterSize="s">
@@ -231,7 +259,7 @@ const Learn: FC = () => {
                             <EuiFlexItem />
                             <EuiFlexItem grow={false}>
                                 <EuiText>
-                                    <div dangerouslySetInnerHTML={{ __html: card.answer }} />
+                                    <div id="cardAnswer" dangerouslySetInnerHTML={{ __html: card.answer }} />
                                 </EuiText>
                             </EuiFlexItem>
                             <EuiFlexItem />

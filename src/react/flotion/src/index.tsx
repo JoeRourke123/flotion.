@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import {Provider} from "react-redux";
 
 import '@elastic/eui/dist/eui_theme_amsterdam_dark.css';
+import 'katex/dist/katex.min.css';
 
 import {
     ApolloClient,
@@ -15,10 +16,11 @@ import {
 } from '@apollo/client';
 import {store} from './store';
 import {UNDERSTANDING_ENUM} from "./utils";
+import {MathJaxContext} from "better-react-mathjax";
 
 const httpLink = createHttpLink({
     // uri: 'https://api.flotion.space/graphql'
-    uri: 'http://localhost:6969/graphql'
+    uri: 'http://joes-macbook-pro:6969/graphql'
 });
 
 const client = new ApolloClient({
@@ -32,7 +34,7 @@ const client = new ApolloClient({
 ReactDOM.render(
     <ApolloProvider client={client}>
         <Provider store={store}>
-            <App/>
+                <App/>
         </Provider>
     </ApolloProvider>,
     document.getElementById('root')
